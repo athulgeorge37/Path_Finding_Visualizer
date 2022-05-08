@@ -1,0 +1,11 @@
+.Grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+
+.Grid_Row {
+    display: flex;
+}
