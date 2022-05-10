@@ -10,3 +10,11 @@
 .Wall {
     background-color: darkblue;
 }
+
+.Start {
+    background-color: green;
+}
+
+.End {
+    background-color: red;
+}

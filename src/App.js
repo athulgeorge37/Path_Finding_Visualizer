@@ -7,7 +7,7 @@ function App() {
   return (
     <div className="App">
       <h1>Path Finding Visualizer</h1>
-      <Grid></Grid>
+      <Grid/>
     </div>
   );
 }
