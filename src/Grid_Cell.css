@@ -11,6 +11,14 @@
     background-color: darkblue;
 }
 
+.Visited {
+    background-color: lightblue;
+}
+
+.Path {
+    background-color: yellow;
+}
+
 .Start {
     background-color: green;
 }
@@ -18,3 +26,4 @@
 .End {
     background-color: red;
 }
+
