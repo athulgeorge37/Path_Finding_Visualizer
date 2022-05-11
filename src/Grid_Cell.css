@@ -1,9 +1,11 @@
 .Grid_Cell {
   border: none;
-  margin: 0;
+  margin: 1px;
   border: 1px solid black;
   width: 30px;
   height: 30px;
+  background-color: white;
+  border-radius: 15%;
 }
 
 
@@ -13,6 +15,7 @@
 
 .Visited {
     background-color: lightblue;
+    animation: animate_visited 1.5s ease-in 0s;
 }
 
 .Path {
@@ -27,3 +30,22 @@
     background-color: red;
 }
 
+@keyframes animate_visited {
+
+    0% {
+        transform: scale(0.3);
+        background-color: aqua;
+        border-radius: 50%;
+    }
+
+    50% {
+        transform: scale(1.1);
+        transform: rotate(90deg);
+        background-color: aquamarine;
+    }
+
+    /* 100% {
+        background-color: lightblue;
+    } */
+    
+}
