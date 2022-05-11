@@ -12,10 +12,15 @@ const START_CELL_Y = 10
 const END_CELL_X = 30
 const END_CELL_Y = 15
 
+const DELAY_ANIMATION = 5
+
 function Grid() {
 
     // const my_Grid = []
     const [my_Grid, set_my_Grid] = useState([])
+
+
+    const visited_cells = []
 
     let my_start_cell = null
     let my_end_cell = null
@@ -34,7 +39,7 @@ function Grid() {
             const my_cell = {
                 x_val: x,
                 y_val: y,
-                my_key: x.toString() + " " + y.toString(),
+                my_key: "(" + x.toString() + ", " + y.toString() + ")",
                 priority: Infinity,
                 is_Wall: false,
                 start_cell: start_cell,
@@ -97,13 +102,14 @@ function Grid() {
                 break
             }
 
-            for (const neighbor_cell of generate_neighbor_cells(my_Grid, current_cell)) {
+            const neighbor_cells = generate_neighbor_cells(my_Grid, current_cell)
+            for (let n=0; n < neighbor_cells.length; n++) {
 
-                // we can have the sleep timer here to slow down the animation
-                document.getElementById(neighbor_cell.my_key).className = "Grid_Cell " + neighbor_cell.my_key + " Visited";
-
+                const neighbor_cell = neighbor_cells[n]
                 const new_cost = cost_so_far[current_cell.my_key] + 1
-               
+
+                visited_cells.push(neighbor_cell)
+
                 if (!(neighbor_cell.my_key in cost_so_far) || new_cost < cost_so_far[neighbor_cell.my_key]) {
                     cost_so_far[neighbor_cell.my_key] = new_cost
                     const priority = new_cost + heuristic(neighbor_cell)
@@ -117,15 +123,10 @@ function Grid() {
         
         const my_cell_path = []
         let my_cell = current_cell
+        let n = 1;
         while (my_cell != null) {
-            my_cell.is_path = true
 
-            // setTimeout(() => {
-            //     document.getElementById(my_cell.my_key).className = "Grid_Cell " + my_cell.my_key + " Path"
-            // }, 100);
-            document.getElementById(my_cell.my_key).className = "Grid_Cell " + my_cell.my_key + " Path";
-            
-
+            my_cell.is_path = true      
             my_cell_path.push(my_cell)
             my_cell = came_from[my_cell.my_key]
         }
@@ -134,13 +135,49 @@ function Grid() {
         if (my_cell_path[0] === my_end_cell) {
             console.log("end cell found")
             console.log("my_cell_path", my_cell_path)
-            set_my_Grid(my_Grid)
+
+            // constructing the searched area with a delay
+            for (let k=0; k < visited_cells.length; k++) {
+                setTimeout(() => {
+                    const neighbor_cell = visited_cells[k]
+
+                    let visited_class_name = "Grid_Cell " + neighbor_cell.my_key + " Visited";
+
+                    if (neighbor_cell === my_start_cell) {
+                        visited_class_name += " Start";
+                    } else if (neighbor_cell === my_end_cell) {
+                        visited_class_name += " End";
+                    }
+
+
+                    document.getElementById(neighbor_cell.my_key).className = visited_class_name
+                }, DELAY_ANIMATION * k)
+            }
+
+
+            // creating the path with a delay
+            const do_after = visited_cells.length * DELAY_ANIMATION
+            for (let n=0; n < my_cell_path.length; n++) {
+                setTimeout(() => {
+                    const my_cell = my_cell_path[n]
+
+                    let path_class_name = "Grid_Cell " + my_cell.my_key + " Path";
+
+                    if (my_cell === my_start_cell) {
+                        path_class_name += " Start";
+                    } else if (my_cell === my_end_cell) {
+                        path_class_name += " End";
+                    }
+
+
+                    document.getElementById(my_cell.my_key).className = path_class_name
+                }, do_after + (DELAY_ANIMATION * n))
+            }
+
+            // set_my_Grid(my_Grid)
         } else {
             console.log("could not find the end cell")
         }
-
-        
-
     }
 
 
@@ -161,7 +198,7 @@ function Grid() {
                 }
                 
             }
-            catch(TypeError) {
+            catch (TypeError) {
                 continue
             }
         }
@@ -183,7 +220,7 @@ function Grid() {
                     return (
                         <div className={"Grid_Row " + row_ID} key={row_ID}>
                             {row.map((my_cell) => {
-                                const {x_val, y_val, is_Wall, priority, my_key, start_cell, end_cell, is_path} = my_cell
+                                const {x_val, y_val, is_Wall, my_key, start_cell, end_cell, is_path} = my_cell
                                 return (
                                     <Grid_Cell 
                                         key={my_key} 

@@ -21,8 +21,6 @@ function Grid_Cell (props) {
         Grid_Cell_class_name += " Start"
     } else if (props.is_End) {
         Grid_Cell_class_name += " End"
-    } else if (props.is_path) {
-        Grid_Cell_class_name += " Path"
     }
 
 
