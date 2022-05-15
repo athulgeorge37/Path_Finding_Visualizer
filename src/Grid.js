@@ -10,7 +10,7 @@ const START_CELL_X = 10
 const START_CELL_Y = 10
 
 const END_CELL_X = 30
-const END_CELL_Y = 15
+const END_CELL_Y = 10
 
 const DELAY_ANIMATION = 10   // was 5
 
@@ -42,7 +42,7 @@ const initialise_empty_grid = () => {
                 is_Wall: false,
                 start_cell: start_cell,
                 end_cell: end_cell,
-                is_path: false
+                is_path: false,
             }
 
             my_row.push(my_cell)
@@ -57,32 +57,9 @@ const initialise_empty_grid = () => {
         empty_grid.push(my_row)
     }
 
-    is_empty_grid(empty_grid)
+    // is_empty_grid(empty_grid)
     return empty_grid
 }
-
-
-const is_empty_grid = (my_Grid) => {
-    let is_empty = true
-    for (const row of my_Grid) {
-        for (const my_cell of row) {
-            console.log("my_cell.is_Wall", my_cell.is_Wall)
-            if (my_cell.is_Wall || my_cell.is_path) {
-                is_empty = false
-            }
-            
-        }
-    }
-
-    console.log()
-    if (is_empty) {
-        console.log("my_Grid is empty")
-    } else {
-        console.log("my_Grid is not empty!!!")
-    }
-    console.log()
-}
-
 
 
 function Grid() {
@@ -90,30 +67,25 @@ function Grid() {
     // searched areas and paths are updated using getElementByID classnames
 
     // all grid cell objects are kept in this array
-    // const my_Grid = []
-    const [my_Grid, set_my_Grid] = useState(initialise_empty_grid())
-
-    // contains all visited cell objects
-    const visited_cells = []
-
-    // initialising the grid cells
-
-
-    useEffect(() => {
-        console.log()
-        console.log("useffect running")
-
-        is_empty_grid(my_Grid)
-        console.log()
-
-    });
+    const [my_Grid, set_my_Grid] = useState(initialise_empty_grid)
 
     const empty_grid = () => {
 
-        console.log()
         console.log("clearing grid")
-        set_my_Grid(initialise_empty_grid())
-        console.log()
+
+        for (const row of my_Grid) {
+            for (const my_cell of row) {
+                if (my_cell === my_start_cell) {
+                    document.getElementById(my_cell.my_key).className = "Grid_Cell " + my_cell.my_key + " Start";
+                } else if (my_cell === my_end_cell) {
+                    document.getElementById(my_cell.my_key).className = "Grid_Cell " + my_cell.my_key + " End";
+                } else {
+                    document.getElementById(my_cell.my_key).className = "Grid_Cell " + my_cell.my_key;
+                }
+            }
+        }
+
+        set_my_Grid(initialise_empty_grid)
     }
 
 
@@ -151,6 +123,8 @@ function Grid() {
         // and the distance from start cell to the current cell as the value
         cost_so_far[my_start_cell.my_key] = 0
 
+        const visited_cells = []
+
         let current_cell = null
         while (!my_queue.isEmpty()) {
             current_cell = my_queue.dequeue().element
@@ -164,12 +138,12 @@ function Grid() {
             // and adding them to the dictionaries
             for (const neighbor_cell of generate_neighbor_cells(current_cell)) {
 
-                const new_cost = cost_so_far[current_cell.my_key] + 1
+                const new_cost = cost_so_far[current_cell.my_key]
 
                 // adding each neighbor cell to visited cell to animate them later
                 visited_cells.push(neighbor_cell)
 
-                if (!(neighbor_cell.my_key in cost_so_far) || new_cost < cost_so_far[neighbor_cell.my_key]) {
+                if ((!(neighbor_cell.my_key in cost_so_far)) || (new_cost < cost_so_far[neighbor_cell.my_key])) {
                     cost_so_far[neighbor_cell.my_key] = new_cost
                     const priority = new_cost + heuristic(neighbor_cell)
                     neighbor_cell.priority = priority
@@ -182,15 +156,18 @@ function Grid() {
         // constructing the path
         const my_cell_path = []
         let my_cell = current_cell
-        while (my_cell != null) {
-            my_cell.is_path = true      
+        while (my_cell != null) {      
+            my_cell.is_path = true
             my_cell_path.push(my_cell)
             my_cell = came_from[my_cell.my_key]
         }
 
         // checking if we have found a path
-        if (my_cell_path[0] === my_end_cell) {
+        if (my_cell_path[0] != my_end_cell) {
+            console.log("could not find the end cell")       
+        } else {
             console.log("end cell found")
+
             // console.log("my_cell_path", my_cell_path)
 
             // changing cells to searched area color with a delay
@@ -229,9 +206,6 @@ function Grid() {
 
                 }, do_after + ((DELAY_ANIMATION + 25) * n));
             }
-
-        } else {
-            console.log("could not find the end cell")
         }
     }
 
@@ -240,7 +214,9 @@ function Grid() {
         // generates all valid neighbor cells of a particular cell
 
         //                       x, y
-        const neighbor_index = [[0, 1], [1, 0], [0, -1], [-1, 0]]
+        // const neighbor_index = [[0, 1], [1, 0], [0, -1], [-1, 0]]
+        const neighbor_index = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+        // const neighbor_index = [[0, -1], [1, 0], [0, 1], [-1, 0]]
 
         const my_neighbors = []
         for (let i=0; i < neighbor_index.length; i++) {
@@ -292,6 +268,7 @@ function Grid() {
                                         is_Start={start_cell}
                                         is_End={end_cell}
                                         is_path={is_path}
+
                                         handle_mouse_down={handle_mouse_down}
                                         handle_mouse_enter={handle_mouse_enter}
                                         handle_mouse_up={handle_mouse_up}

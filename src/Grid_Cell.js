@@ -24,7 +24,7 @@ function Grid_Cell (props) {
         Grid_Cell_class_name += " End"
     }
 
-    // console.log(Grid_Cell_class_name)
+    //console.log(Grid_Cell_class_name)
 
     // mouse events are sent back to the Grid component
     // so that multiple cell walls can be updated on click and drage events

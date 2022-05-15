@@ -1,7 +1,7 @@
 .Grid_Cell {
   border: none;
   margin: 1px;
-  border: 1px solid black;
+  border: 1px solid lightblue;
   width: 30px;
   height: 30px;
   background-color: white;
@@ -11,6 +11,7 @@
 
 .Wall {
     background-color: darkblue;
+    border: 1px solid darkblue;
 }
 
 .Visited {
@@ -19,28 +20,32 @@
 }
 
 .Path {
-    background-color: yellow;
+    background-color: rgb(224, 118, 19);
+    border: 1px solid rgb(224, 118, 19);
 }
 
 .Start {
     background-color: green;
+    border: 1px solid green;
 }
 
 .End {
     background-color: red;
+    border: 1px solid red;
 }
 
 @keyframes animate_visited {
 
     0% {
-        transform: scale(0.3);
+        transform: scale(0.2);
         background-color: aqua;
         border-radius: 50%;
+        transform: rotate(90deg);
     }
 
     50% {
-        transform: scale(1.1);
-        transform: rotate(90deg);
+        transform: scale(1.2);
+        transform: rotate(180deg);
         background-color: aquamarine;
     }
 
