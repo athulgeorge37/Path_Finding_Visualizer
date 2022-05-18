@@ -12,16 +12,33 @@ const START_CELL_Y = 10
 const END_CELL_X = 30
 const END_CELL_Y = 10
 
-const DELAY_ANIMATION = 10   // was 5
+const DELAY_ANIMATION = 5   // was 10
 
-let my_start_cell = null
-let my_end_cell = null
+// let my_start_cell = null
+// let my_end_cell = null
+
+let my_start_cell = {
+    x_val: START_CELL_X,
+    y_val: START_CELL_Y,
+    my_key: "(" + START_CELL_X.toString() + ", " + START_CELL_Y.toString() + ")",
+    priority: Infinity,
+    cell_state: "START"
+}
+
+let my_end_cell = {
+    x_val: END_CELL_X,
+    y_val: END_CELL_Y,
+    my_key: "(" + END_CELL_X.toString() + ", " + END_CELL_Y.toString() + ")",
+    priority: Infinity,
+    cell_state: "END"
+}
 
 
 const initialise_empty_grid = () => {
 
     console.log("rendering empty grid")
-    // console.log("start_x, start_y, end_x, end_y", start_x, start_y, end_x, end_y)
+    // console.log("my_start_cell", my_start_cell)
+    // console.log("my_end_cell", my_end_cell)
 
     const empty_grid = []
 
@@ -30,9 +47,9 @@ const initialise_empty_grid = () => {
         for (let x = 0; x < GRID_LENGTH; x++) {
 
             let my_cell_state = "AIR"
-            if (x === START_CELL_X && y === START_CELL_Y) {
+            if (x === my_start_cell.x_val && y === my_start_cell.y_val) {
                 my_cell_state = "START"
-            } else if (x === END_CELL_X && y === END_CELL_Y) {
+            } else if (x === my_end_cell.x_val && y === my_end_cell.y_val) {
                 my_cell_state = "END"
             }
 
@@ -86,14 +103,21 @@ function Grid(props) {
 
         for (const row of my_Grid) {
             for (const my_cell of row) {
-                if (my_cell === my_start_cell) {
-                    // console.log(my_cell)
+                const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
+                if (current_classname.includes("Start")) {
                     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell Start";
-                } else if (my_cell === my_end_cell) {
+                } else if (current_classname.includes("End")) {
                     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell End";
                 } else {
                     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell";
                 }
+                // if (my_cell === my_start_cell) {
+                //     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell Start";
+                // } else if (my_cell === my_end_cell) {
+                //     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell End";
+                // } else {
+                //     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell";
+                // }
             }
         }
 
@@ -168,7 +192,6 @@ function Grid(props) {
 
     const handle_mouse_click = (x, y, my_key) => {  
         my_grid_ref.current[y][x].className = identify_cell_type(my_key, x, y)
-
     }
 
 
