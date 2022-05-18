@@ -1,5 +1,5 @@
 import Grid_Cell from "./Grid_Cell"
-import { useEffect, useState, } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import "./Grid.css"
 import { PriorityQueue } from "./priority_queue"
 
@@ -20,36 +20,37 @@ let my_end_cell = null
 
 const initialise_empty_grid = () => {
 
+    console.log("rendering empty grid")
+    // console.log("start_x, start_y, end_x, end_y", start_x, start_y, end_x, end_y)
+
     const empty_grid = []
 
     for (let y = 0; y < GRID_HEIGHT; y++) {
         const my_row = []
         for (let x = 0; x < GRID_LENGTH; x++) {
 
-            let start_cell = false
-            let end_cell = false
+            let my_cell_state = "AIR"
             if (x === START_CELL_X && y === START_CELL_Y) {
-                start_cell = true
+                my_cell_state = "START"
             } else if (x === END_CELL_X && y === END_CELL_Y) {
-                end_cell = true
+                my_cell_state = "END"
             }
+
 
             const my_cell = {
                 x_val: x,
                 y_val: y,
                 my_key: "(" + x.toString() + ", " + y.toString() + ")",
                 priority: Infinity,
-                is_Wall: false,
-                start_cell: start_cell,
-                end_cell: end_cell,
-                is_path: false,
+                cell_state: my_cell_state
             }
 
             my_row.push(my_cell)
 
-            if (start_cell) {
+            if (my_cell_state === "START") {
                 my_start_cell = my_cell
-            } else if (end_cell) {
+                // console.log("my_start_cell", my_start_cell)
+            } else if (my_cell_state === "END") {
                 my_end_cell = my_cell
             }
 
@@ -62,57 +63,132 @@ const initialise_empty_grid = () => {
 }
 
 
-function Grid() {
+function Grid(props) {
     // the grid is only rendered once, grid cell components are updated and rendered for walls
     // searched areas and paths are updated using getElementByID classnames
 
     // all grid cell objects are kept in this array
     const [my_Grid, set_my_Grid] = useState(initialise_empty_grid)
+    const [mouse_down, set_mouse_down] = useState(false)
+    // const [my_start_cell, set_my_start_cell] = useState(null)
 
-    const empty_grid = () => {
+
+    const my_grid_ref = useRef([])
+
+    // useEffect(() => {
+    //     console.log("my_grid_ref", my_grid_ref)
+    // }, [])
+
+    
+    const clear_grid = () => {
 
         console.log("clearing grid")
 
         for (const row of my_Grid) {
             for (const my_cell of row) {
                 if (my_cell === my_start_cell) {
-                    document.getElementById(my_cell.my_key).className = "Grid_Cell " + my_cell.my_key + " Start";
+                    // console.log(my_cell)
+                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell Start";
                 } else if (my_cell === my_end_cell) {
-                    document.getElementById(my_cell.my_key).className = "Grid_Cell " + my_cell.my_key + " End";
+                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell End";
                 } else {
-                    document.getElementById(my_cell.my_key).className = "Grid_Cell " + my_cell.my_key;
+                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell";
                 }
             }
         }
+
+        // console.log("my_start_cell", my_start_cell)
+        // console.log("my_end_cell", my_end_cell)
 
         set_my_Grid(initialise_empty_grid)
     }
 
 
-    let mouse_down = false
-    // below 3 handle_mouse methods are for clicking and dragging walls on the grid
-    const handle_mouse_down = (update_wall, x, y) => {        
-        update_wall()
-        my_Grid[y][x].is_Wall = !my_Grid[y][x].is_Wall
-        mouse_down = true
+    const identify_cell_type = (my_key, x, y) => {
+        const prev_cell_state = my_Grid[y][x].cell_state
+
+        let new_class_name = my_key + " Grid_Cell"
+        if (props.active_cell_type === "my_cell_type_Air") {
+
+            my_Grid[y][x].cell_state = "AIR"
+
+        }
+        if (props.active_cell_type === "my_cell_type_Wall") {
+
+            my_Grid[y][x].cell_state = "WALL"
+            new_class_name += " Wall"
+
+        } else if (props.active_cell_type === "my_cell_type_Start") {
+            
+            my_Grid[y][x].cell_state = "START"
+
+            my_start_cell.cell_state = "AIR"
+            console.log("current start cell", my_start_cell)
+            my_start_cell = my_Grid[y][x]
+            console.log("new start cell", my_start_cell)
+
+            new_class_name += " Start"
+
+        } else if (props.active_cell_type === "my_cell_type_End") {
+
+            my_Grid[y][x].cell_state = "END"
+
+            my_end_cell.cell_state = "AIR"
+            my_end_cell = my_Grid[y][x]
+
+            new_class_name += " End"
+
+        }
+
+        // console.log("changing cell at", my_key, "from", prev_cell_state, "to", my_Grid[y][x].cell_state)
+
+        return new_class_name
     }
 
-    const handle_mouse_enter = (update_wall, x, y) => {
+    const handle_mouse_down = (x, y, my_key) => {   
+        
+        try {
+            my_grid_ref.current[y][x].className = identify_cell_type(my_key, x, y)
+            set_mouse_down(true)
+        } catch (TypeError) {
+            set_mouse_down(false)
+        }
+            
+    }
+
+    const handle_mouse_enter = (x, y, my_key) => {
+
         if (mouse_down) {
-            update_wall()
             my_Grid[y][x].is_Wall = !my_Grid[y][x].is_Wall
+            my_grid_ref.current[y][x].className = identify_cell_type(my_key, x, y)
         }
     }
 
     const handle_mouse_up = () => {
-        mouse_down = false
+        set_mouse_down(false)
+    }
+
+
+    const clear_visited_and_path_cells = () => {
+        for (const row of my_Grid) {
+            for (const my_cell of row) {
+                const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
+                if ((current_classname.includes("Path") || current_classname.includes("Visited")) &&
+                    !(current_classname.includes("Start") || current_classname.includes("End"))) {
+
+                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell";
+                }
+            }
+        }
     }
 
 
     const A_STAR_Algorithm = () => {
-        console.log("Starting A Star algo")
+        console.log("Starting A Star Algo")
 
-        let my_queue = new PriorityQueue();
+        clear_visited_and_path_cells()
+        
+        let my_queue = new PriorityQueue();      
 
         my_queue.enqueue(my_start_cell, 0)
 
@@ -128,7 +204,7 @@ function Grid() {
         let current_cell = null
         while (!my_queue.isEmpty()) {
             current_cell = my_queue.dequeue().element
-        
+
             if (current_cell === my_end_cell) {
                 // end cell found, breaking out of while loop
                 break
@@ -138,10 +214,11 @@ function Grid() {
             // and adding them to the dictionaries
             for (const neighbor_cell of generate_neighbor_cells(current_cell)) {
 
-                const new_cost = cost_so_far[current_cell.my_key]
-
                 // adding each neighbor cell to visited cell to animate them later
                 visited_cells.push(neighbor_cell)
+
+                 // const new_cost = cost_so_far[current_cell.my_key]
+                 const new_cost = cost_so_far[current_cell.my_key] + 1
 
                 if ((!(neighbor_cell.my_key in cost_so_far)) || (new_cost < cost_so_far[neighbor_cell.my_key])) {
                     cost_so_far[neighbor_cell.my_key] = new_cost
@@ -157,10 +234,11 @@ function Grid() {
         const my_cell_path = []
         let my_cell = current_cell
         while (my_cell != null) {      
-            my_cell.is_path = true
             my_cell_path.push(my_cell)
             my_cell = came_from[my_cell.my_key]
         }
+
+        // console.log("My cell path is", my_cell_path)
 
         // checking if we have found a path
         if (my_cell_path[0] != my_end_cell) {
@@ -175,15 +253,14 @@ function Grid() {
                 setTimeout(() => {
                     const neighbor_cell = visited_cells[k]
 
-                    let visited_class_name = "Grid_Cell " + neighbor_cell.my_key + " Visited";
+                    let visited_class_name =  neighbor_cell.my_key + " Grid_Cell Visited";
 
-                    if (neighbor_cell === my_start_cell) {
+                    if (neighbor_cell.cell_state === "START") {
                         visited_class_name += " Start";
-                    } else if (neighbor_cell === my_end_cell) {
+                    } else if (neighbor_cell.cell_state === "END") {
                         visited_class_name += " End";
                     }
-
-                    document.getElementById(neighbor_cell.my_key).className = visited_class_name
+                    my_grid_ref.current[neighbor_cell.y_val][neighbor_cell.x_val].className = visited_class_name
 
                 }, DELAY_ANIMATION * k);
             }
@@ -194,7 +271,7 @@ function Grid() {
                 setTimeout(() => {
                     const my_cell = my_cell_path[n]
 
-                    let path_class_name = "Grid_Cell " + my_cell.my_key + " Path";
+                    let path_class_name = my_cell.my_key + " Grid_Cell Path";
 
                     if (my_cell === my_start_cell) {
                         path_class_name += " Start";
@@ -202,7 +279,7 @@ function Grid() {
                         path_class_name += " End";
                     }
 
-                    document.getElementById(my_cell.my_key).className = path_class_name
+                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = path_class_name
 
                 }, do_after + ((DELAY_ANIMATION + 25) * n));
             }
@@ -227,7 +304,7 @@ function Grid() {
                 const new_neighbor = my_Grid[new_y][new_x]
 
                 // checking if the neighbor cell is a wall or not
-                if (!new_neighbor.is_Wall) {
+                if (new_neighbor.cell_state != "WALL") {
                     my_neighbors.push(new_neighbor)
                 }
                 
@@ -250,29 +327,42 @@ function Grid() {
 
     return (
         <>
-            <button onClick={A_STAR_Algorithm}>Start A*</button>
-            <button onClick={empty_grid}>Clear Grid</button>
+            <div className="buttons">
+                <button onClick={A_STAR_Algorithm}>Start A*</button>
+                <button onClick={clear_grid}>Clear Grid</button>
+            </div>
+
             <div className="Grid">
                 {my_Grid.map((row, row_ID) => {
+                    my_grid_ref.current[row_ID] = []
                     return (
                         <div className={"Grid_Row " + row_ID} key={row_ID}>
-                            {row.map((my_cell) => {
-                                const {x_val, y_val, is_Wall, my_key, start_cell, end_cell, is_path} = my_cell
-                                return (
-                                    <Grid_Cell 
-                                        key={my_key} 
-                                        my_key={my_key}
-                                        x_val={x_val} 
-                                        y_val={y_val} 
-                                        is_Wall={is_Wall}
-                                        is_Start={start_cell}
-                                        is_End={end_cell}
-                                        is_path={is_path}
+                            {row.map((my_cell, cell_index) => {
+                                const {x_val, y_val, cell_state, my_key} = my_cell
 
-                                        handle_mouse_down={handle_mouse_down}
-                                        handle_mouse_enter={handle_mouse_enter}
-                                        handle_mouse_up={handle_mouse_up}
+                                let my_class_name = my_key + " Grid_Cell"
+                                if (cell_state === "START") {
+                                    my_class_name += " Start"
+                                } else if (cell_state === "END") {
+                                    my_class_name += " End"
+                                }
+
+                                return (
+
+                                    <div
+                                        key={my_key}
+                                        className={my_class_name}
+                                        ref={(element) => {
+                                            // console.log(element)
+                                            // console.log(cell_index)
+                                            my_grid_ref.current[row_ID][cell_index] = element;
+                                        }}
+
+                                        onMouseDown={() => handle_mouse_down(x_val, y_val, my_key)}
+                                        onMouseEnter={() => handle_mouse_enter(x_val, y_val, my_key)}
+                                        onMouseUp={() => handle_mouse_up()}
                                     />
+
                                 )})}
                         </div>
                     );

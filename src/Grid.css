@@ -9,3 +9,71 @@
 .Grid_Row {
     display: flex;
 }
+
+button {
+    height: 40px;
+    padding: 3px;
+    margin: 5px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.Grid_Cell {
+    margin: 1px;
+    border: 1px solid lightblue;
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border-radius: 15%;
+}
+  
+  
+.Wall {
+    background-color: darkblue;
+    border: 1px solid darkblue;
+}
+
+.Visited {
+    background-color: lightblue;
+    animation: animate_visited 1.5s ease-in 0s;
+}
+
+.Path {
+    background-color: rgb(224, 118, 19);
+    border: 1px solid rgb(224, 118, 19);
+}
+
+.Start {
+    background-color: green;
+    border: 1px solid green;
+}
+
+.End {
+    background-color: red;
+    border: 1px solid red;
+}
+
+@keyframes animate_visited {
+
+    0% {
+        transform: scale(0.2);
+        background-color: aqua;
+        border-radius: 50%;
+        transform: rotate(90deg);
+    }
+
+    50% {
+        transform: scale(1.2);
+        transform: rotate(180deg);
+        background-color: aquamarine;
+    }
+
+    /* 100% {
+        background-color: lightblue;
+    } */
+    
+}
+  
