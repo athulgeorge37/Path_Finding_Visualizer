@@ -12,7 +12,7 @@ const START_CELL_Y = 10
 const END_CELL_X = 30
 const END_CELL_Y = 10
 
-const DELAY_ANIMATION = 5   // was 10
+const DELAY_ANIMATION = 10   // was 5
 
 // let my_start_cell = null
 // let my_end_cell = null
@@ -87,7 +87,6 @@ function Grid(props) {
     // all grid cell objects are kept in this array
     const [my_Grid, set_my_Grid] = useState(initialise_empty_grid)
     const [mouse_down, set_mouse_down] = useState(false)
-    // const [my_start_cell, set_my_start_cell] = useState(null)
 
 
     const my_grid_ref = useRef([])
@@ -111,13 +110,7 @@ function Grid(props) {
                 } else {
                     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell";
                 }
-                // if (my_cell === my_start_cell) {
-                //     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell Start";
-                // } else if (my_cell === my_end_cell) {
-                //     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell End";
-                // } else {
-                //     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell";
-                // }
+
             }
         }
 
@@ -281,7 +274,7 @@ function Grid(props) {
         }
 
         // constructing the path
-        const my_cell_path = []
+        let my_cell_path = []
         let my_cell = current_cell
         while (my_cell != null) {      
             my_cell_path.push(my_cell)
@@ -315,6 +308,7 @@ function Grid(props) {
                 }, DELAY_ANIMATION * k);
             }
 
+            my_cell_path = my_cell_path.reverse()
             // changing cells to path color with a delay
             const do_after = visited_cells.length * DELAY_ANIMATION
             for (let n=0; n < my_cell_path.length; n++) {
