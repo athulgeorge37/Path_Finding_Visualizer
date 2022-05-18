@@ -108,6 +108,7 @@ function Grid(props) {
         const prev_cell_state = my_Grid[y][x].cell_state
 
         let new_class_name = my_key + " Grid_Cell"
+
         if (props.active_cell_type === "my_cell_type_Air") {
 
             my_Grid[y][x].cell_state = "AIR"
@@ -120,22 +121,42 @@ function Grid(props) {
 
         } else if (props.active_cell_type === "my_cell_type_Start") {
             
+            // updating cell state of new start cell in the grid
             my_Grid[y][x].cell_state = "START"
 
-            my_start_cell.cell_state = "AIR"
-            console.log("current start cell", my_start_cell)
-            my_start_cell = my_Grid[y][x]
-            console.log("new start cell", my_start_cell)
+            // updating cell state of old start cell in the grid
+            my_Grid[my_start_cell.y_val][my_start_cell.x_val].cell_state = "AIR"
 
+            // updating old start cell to air cell
+            my_start_cell.cell_state = "AIR"
+
+            // making the visual grid reflect the old start cell changes by changing the classname
+            my_grid_ref.current[my_start_cell.y_val][my_start_cell.x_val].className = new_class_name // making it air cell
+
+            // new start cell with appropriate updates
+            my_start_cell = my_Grid[y][x]
+
+            // new class name for new start cell in the visual grid
             new_class_name += " Start"
 
         } else if (props.active_cell_type === "my_cell_type_End") {
 
+            // updating cell state of new start cell in the grid
             my_Grid[y][x].cell_state = "END"
 
+            // updating cell state of old start cell in the grid
+            my_Grid[my_end_cell.y_val][my_end_cell.x_val].cell_state = "AIR"
+
+            // updating old start cell to air cell
             my_end_cell.cell_state = "AIR"
+
+            // making the visual grid reflect the old start cell changes by changing the classname
+            my_grid_ref.current[my_end_cell.y_val][my_end_cell.x_val].className = new_class_name // making it air cell
+
+            // new start cell with appropriate updates
             my_end_cell = my_Grid[y][x]
 
+            // new class name for new start cell in the visual grid
             new_class_name += " End"
 
         }
@@ -144,6 +165,12 @@ function Grid(props) {
 
         return new_class_name
     }
+
+    const handle_mouse_click = (x, y, my_key) => {  
+        my_grid_ref.current[y][x].className = identify_cell_type(my_key, x, y)
+
+    }
+
 
     const handle_mouse_down = (x, y, my_key) => {   
         
@@ -343,12 +370,27 @@ function Grid(props) {
                                 let my_class_name = my_key + " Grid_Cell"
                                 if (cell_state === "START") {
                                     my_class_name += " Start"
-                                } else if (cell_state === "END") {
+                                } 
+                                else if (cell_state === "END") {
                                     my_class_name += " End"
+                                } 
+
+                                if (props.active_cell_type === "my_cell_type_Start" ||
+                                    props.active_cell_type === "my_cell_type_End") {
+                                    return (
+                                        <div
+                                            key={my_key}
+                                            className={my_class_name}
+                                            ref={(element) => {
+                                                my_grid_ref.current[row_ID][cell_index] = element;
+                                            }}
+
+                                            onClick={() => handle_mouse_click(x_val, y_val, my_key)}
+                                        />
+                                    )
                                 }
 
                                 return (
-
                                     <div
                                         key={my_key}
                                         className={my_class_name}
@@ -362,8 +404,9 @@ function Grid(props) {
                                         onMouseEnter={() => handle_mouse_enter(x_val, y_val, my_key)}
                                         onMouseUp={() => handle_mouse_up()}
                                     />
+                                )
 
-                                )})}
+                                })}
                         </div>
                     );
                 })}

@@ -1,7 +1,6 @@
 import './App.css';
 import { useState } from "react";
 import Grid from "./Grid";
-import Test from "./Test"
 
 
 // this is where we will add all the components of the project
