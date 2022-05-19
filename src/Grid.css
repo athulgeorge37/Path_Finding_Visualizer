@@ -16,7 +16,7 @@ button {
     margin: 5px;
 }
 
-.buttons {
+.buttons, .slider {
     display: flex;
     justify-content: center;
 }
@@ -38,27 +38,46 @@ button {
 
 .Visited {
     background-color: lightblue;
+}
+
+.Visited_Animated {
+    background-color: lightblue;
     animation: animate_visited 1.5s ease-in 0s;
 }
 
 .Path {
     background-color: rgb(224, 118, 19);
     border: 1px solid rgb(224, 118, 19);
+    animation: animate_path 1s ease-in-out 0s;
 }
 
 .Start {
     background-color: green;
     border: 1px solid green;
+    animation: animate_start_end 0.25s ease-in-out 0s;
 }
 
 .End {
     background-color: red;
     border: 1px solid red;
+    animation: animate_start_end 0.25s ease-in-out 0s;
+}
+
+@keyframes animate_start_end {
+
+    0% {
+        transform: scale(0.3);
+    }
+
+    60% {
+        transform: scale(1.2);
+    }
+    
 }
 
 @keyframes animate_visited {
 
-    0% {
+    /* 0% {
         transform: scale(0.2);
         background-color: purple;
         border-radius: 50%;
@@ -73,11 +92,29 @@ button {
         transform: scale(1.2);
         transform: rotate(180deg);
         background-color: aquamarine;
+    } */
+
+    0% {
+        transform: scale(0.4);
+        background-color: purple;
     }
 
-    /* 100% {
-        background-color: lightblue;
-    } */
+    10% {
+        background-color: aqua;
+    }
+
+    50% {
+        transform: scale(1.1);
+        background-color: aquamarine;
+    }
+    
+}
+
+@keyframes animate_path {
+
+    0% {
+        transform: scale(0.4);
+    }
     
 }
   

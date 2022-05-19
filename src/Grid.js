@@ -1,4 +1,4 @@
-import Grid_Cell from "./Grid_Cell"
+// import Grid_Cell from "./Grid_Cell"
 import { useEffect, useState, useRef } from 'react';
 import "./Grid.css"
 import { PriorityQueue } from "./priority_queue"
@@ -87,6 +87,8 @@ function Grid(props) {
     // all grid cell objects are kept in this array
     const [my_Grid, set_my_Grid] = useState(initialise_empty_grid)
     const [mouse_down, set_mouse_down] = useState(false)
+    const [animation_speed, set_animation_speed] = useState(DELAY_ANIMATION)
+    const [max_animation_speed, set_max_animation_speed] = useState(50)
 
 
     const my_grid_ref = useRef([])
@@ -289,14 +291,19 @@ function Grid(props) {
         } else {
             console.log("end cell found")
 
-            // console.log("my_cell_path", my_cell_path)
+
+            // prevents animating when animation speed is low, cus it looks laggy
+            let check_animated = "Visited"
+            if (animation_speed > 3) {
+                check_animated = "Visited_Animated"
+            }
 
             // changing cells to searched area color with a delay
             for (let k=0; k < visited_cells.length; k++) {
                 setTimeout(() => {
                     const neighbor_cell = visited_cells[k]
 
-                    let visited_class_name =  neighbor_cell.my_key + " Grid_Cell Visited";
+                    let visited_class_name =  neighbor_cell.my_key + " Grid_Cell " + check_animated;
 
                     if (neighbor_cell.cell_state === "START") {
                         visited_class_name += " Start";
@@ -305,12 +312,13 @@ function Grid(props) {
                     }
                     my_grid_ref.current[neighbor_cell.y_val][neighbor_cell.x_val].className = visited_class_name
 
-                }, DELAY_ANIMATION * k);
+                    // animation speed 
+                }, animation_speed * k);
             }
 
             my_cell_path = my_cell_path.reverse()
             // changing cells to path color with a delay
-            const do_after = visited_cells.length * DELAY_ANIMATION
+            const visited_animation_end_time = visited_cells.length * animation_speed
             for (let n=0; n < my_cell_path.length; n++) {
                 setTimeout(() => {
                     const my_cell = my_cell_path[n]
@@ -325,7 +333,10 @@ function Grid(props) {
 
                     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = path_class_name
 
-                }, do_after + ((DELAY_ANIMATION + 25) * n));
+                    // path animation speed will remain the same no mater what animation speed given
+                    // this is to prevent really slow and really fast path speeds
+                }, visited_animation_end_time + (50 * n));
+
             }
         }
     }
@@ -374,6 +385,24 @@ function Grid(props) {
             <div className="buttons">
                 <button onClick={A_STAR_Algorithm}>Start A*</button>
                 <button onClick={clear_grid}>Clear Grid</button>
+                <button onClick={clear_visited_and_path_cells}>Clear Path</button>
+            </div>
+
+            <div className="slider">
+                <div>Animation Speed = {animation_speed}</div>
+                <input 
+                    type="range" 
+                    min={0} 
+                    max={max_animation_speed} 
+                    value={animation_speed} 
+                    onChange={(e) => set_animation_speed(e.target.value)}
+                />
+                <input 
+                    type="text" 
+                    value={max_animation_speed} 
+                    onChange={(e) => set_max_animation_speed(e.target.value)}
+                />
+                
             </div>
 
             <div className="Grid">

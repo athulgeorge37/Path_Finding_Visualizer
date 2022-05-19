@@ -3,7 +3,7 @@ h1 {
    justify-content: center;
 }
 
-.cell_types {
+.cell_types {   
     display: flex;
     justify-content: center;
 }
