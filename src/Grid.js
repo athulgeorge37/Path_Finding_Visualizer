@@ -88,6 +88,7 @@ function Grid(props) {
     const [my_Grid, set_my_Grid] = useState(initialise_empty_grid)
     const [mouse_down, set_mouse_down] = useState(false)
     const [animation_speed, set_animation_speed] = useState(DELAY_ANIMATION)
+    const [min_animation_speed, set_min_animation_speed] = useState(0)
     const [max_animation_speed, set_max_animation_speed] = useState(50)
 
 
@@ -230,6 +231,8 @@ function Grid(props) {
 
     const A_STAR_Algorithm = () => {
         console.log("Starting A Star Algo")
+
+        my_grid_ref.current[0][0].scrollIntoView()
 
         clear_visited_and_path_cells()
         
@@ -388,21 +391,47 @@ function Grid(props) {
                 <button onClick={clear_visited_and_path_cells}>Clear Path</button>
             </div>
 
-            <div className="slider">
-                <div>Animation Speed = {animation_speed}</div>
-                <input 
-                    type="range" 
-                    min={0} 
-                    max={max_animation_speed} 
-                    value={animation_speed} 
-                    onChange={(e) => set_animation_speed(e.target.value)}
-                />
-                <input 
-                    type="text" 
-                    value={max_animation_speed} 
-                    onChange={(e) => set_max_animation_speed(e.target.value)}
-                />
-                
+            <div className="slider_div">
+                <div>Animation Speed:</div>
+                <div className="animation_speed_div">
+                    <button 
+                        onClick={() => set_animation_speed(animation_speed - 1)}
+                        className="slider_incrementers"
+                    >-</button>
+                    <div className="animation_speed_display">{animation_speed}</div>
+                    <button 
+                        onClick={() => set_animation_speed(animation_speed + 1)}
+                        className="slider_incrementers"
+                    >+</button>
+                </div>
+
+                <div className="slider_properties">
+
+                    <input 
+                        type="text" 
+                        value={min_animation_speed} 
+                        onChange={(e) => set_min_animation_speed(e.target.value)}
+                        className="min_max_input"
+                    />
+                    
+                    <input 
+                        type="range" 
+                        min={0} 
+                        max={max_animation_speed} 
+                        value={animation_speed} 
+                        onChange={(e) => set_animation_speed(parseInt(e.target.value))}
+
+                        className="slider"
+                    />
+
+                    <input 
+                        type="text" 
+                        value={max_animation_speed} 
+                        onChange={(e) => set_max_animation_speed(e.target.value)}
+                        className="min_max_input"
+                    />
+                    
+                </div>
             </div>
 
             <div className="Grid">
