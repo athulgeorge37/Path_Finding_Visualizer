@@ -3,6 +3,8 @@ h1 {
    justify-content: center;
 }
 
+/* start of cell type picker css */
+
 .cell_types {   
     display: flex;
     justify-content: center;
@@ -11,22 +13,22 @@ h1 {
 
 .AIR_cell_type {
     background-color: white;
-    border: 3px solid lightblue;
+    /* border: 3px solid lightblue; */
 }
 
 .WALL_cell_type {
     background-color: darkblue;
-    border: 3px solid darkblue;
+    /* border: 3px solid darkblue; */
 }
 
 .START_cell_type {
     background-color: green;
-    border: 3px solid green;
+    /* border: 3px solid green; */
 }
 
 .END_cell_type {
     background-color: red;
-    border: 3px solid red;
+    /* border: 3px solid red; */
 }
 
 .cell_type {
@@ -34,6 +36,7 @@ h1 {
     width: 30px;
     height: 30px;
     border-radius: 15%;
+    border: 3px solid lightblue;
 }
 
 .cell_type:hover {
@@ -44,6 +47,8 @@ h1 {
 .active {
     border: 3px solid orange;
 }
+
+/* end of cell type picker css */
 
 
 

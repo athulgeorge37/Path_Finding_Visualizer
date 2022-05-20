@@ -33,9 +33,7 @@ let my_end_cell = {
 
 const initialise_empty_grid = () => {
 
-    console.log("rendering empty grid")
-    // console.log("my_start_cell", my_start_cell)
-    // console.log("my_end_cell", my_end_cell)
+    // console.log("rendering empty grid")
 
     const empty_grid = []
 
@@ -63,7 +61,6 @@ const initialise_empty_grid = () => {
 
             if (my_cell_state === "START") {
                 my_start_cell = my_cell
-                // console.log("my_start_cell", my_start_cell)
             } else if (my_cell_state === "END") {
                 my_end_cell = my_cell
             }
@@ -72,7 +69,6 @@ const initialise_empty_grid = () => {
         empty_grid.push(my_row)
     }
 
-    // is_empty_grid(empty_grid)
     return empty_grid
 }
 
@@ -117,9 +113,20 @@ function Grid(props) {
 
     const identify_cell_type = (my_key, x, y) => {
 
-        let new_class_name = my_key + " Grid_Cell"
+        let new_class_name = my_key + " Grid_Cell "
+        const prev_cell_state = my_Grid[y][x].cell_state
+        let can_be_updated = true
+
+        // preventing user from making a start/end cell into a wall/air cell
+        if (props.active_cell_type === "AIR" || props.active_cell_type === "WALL") {
+            if (prev_cell_state === "START" || prev_cell_state === "END") {
+                new_class_name += prev_cell_state
+                can_be_updated = false
+            }
+        }
 
         
+
         if (props.active_cell_type === "START") {
 
             // updating cell state of old start cell in the grid
@@ -151,10 +158,12 @@ function Grid(props) {
 
         }
 
-        my_Grid[y][x].cell_state = props.active_cell_type
-        new_class_name += " " + props.active_cell_type
+        if (can_be_updated) {
+            my_Grid[y][x].cell_state = props.active_cell_type
+            new_class_name += props.active_cell_type
+        }
 
-        // const prev_cell_state = my_Grid[y][x].cell_state
+       
         // console.log("changing cell at", my_key, "from", prev_cell_state, "to", my_Grid[y][x].cell_state)
 
         return new_class_name
@@ -204,7 +213,7 @@ function Grid(props) {
 
 
     const A_STAR_Algorithm = () => {
-        console.log("Starting A Star Algo")
+        // console.log("Starting A Star Algo")
 
         my_grid_ref.current[0][0].scrollIntoView()
 
@@ -253,6 +262,26 @@ function Grid(props) {
         }
 
         // constructing the path
+        const my_cell_path = construct_path(current_cell, came_from)
+
+        // console.log("My cell path is", my_cell_path)
+
+        // checking if we have found a path
+        if (my_cell_path[0] != my_end_cell) {
+            // console.log("could not find the end cell")       
+            animate_visited_cells(visited_cells)
+        } else {
+            // console.log("end cell found")
+
+            animate_visited_cells(visited_cells)
+            animate_path_cells(my_cell_path, visited_cells.length)
+            
+        }
+    }
+
+
+    const construct_path = (current_cell, came_from) => {
+
         let my_cell_path = []
         let my_cell = current_cell
         while (my_cell != null) {      
@@ -260,37 +289,36 @@ function Grid(props) {
             my_cell = came_from[my_cell.my_key]
         }
 
-        // console.log("My cell path is", my_cell_path)
-
-        // checking if we have found a path
-        if (my_cell_path[0] != my_end_cell) {
-            console.log("could not find the end cell")       
-        } else {
-            console.log("end cell found")
+        return my_cell_path
+    }
 
 
-            // prevents animating when animation speed is low, cus it looks laggy
-            let check_animated = "Visited"
-            if (props.animation_speed > 3) {
-                check_animated = "Visited_Animated"
-            }
+    const animate_visited_cells = (visited_cells) => {
+        // prevents animating when animation speed is low, cus it looks laggy
+        let check_animated = "Visited"
+        if (props.animation_speed > 3) {
+            check_animated = "Visited_Animated"
+        }
 
-            // changing cells to searched area color with a delay
-            for (let k=0; k < visited_cells.length; k++) {
-                setTimeout(() => {
-                    const neighbor_cell = visited_cells[k]
+        // changing cells to searched area color with a delay
+        for (let k=0; k < visited_cells.length; k++) {
+            setTimeout(() => {
+                const neighbor_cell = visited_cells[k]
 
-                    let visited_class_name =  neighbor_cell.my_key + " Grid_Cell " + check_animated + " " + neighbor_cell.cell_state;
+                let visited_class_name =  neighbor_cell.my_key + " Grid_Cell " + check_animated + " " + neighbor_cell.cell_state;
 
-                    my_grid_ref.current[neighbor_cell.y_val][neighbor_cell.x_val].className = visited_class_name
+                my_grid_ref.current[neighbor_cell.y_val][neighbor_cell.x_val].className = visited_class_name
 
-                    // animation speed 
-                }, props.animation_speed * k);
-            }
+                // animation speed 
+            }, props.animation_speed * k);
+        }
+        
+    }
 
-            my_cell_path = my_cell_path.reverse()
+    const animate_path_cells = (my_cell_path, visited_cell_length) => {
+        my_cell_path = my_cell_path.reverse()
             // changing cells to path color with a delay
-            const visited_animation_end_time = visited_cells.length * props.animation_speed
+            const visited_animation_end_time = visited_cell_length * props.animation_speed
             for (let n=0; n < my_cell_path.length; n++) {
                 setTimeout(() => {
                     const my_cell = my_cell_path[n]
@@ -304,7 +332,6 @@ function Grid(props) {
                 }, visited_animation_end_time + (50 * n));
 
             }
-        }
     }
 
 
@@ -365,12 +392,6 @@ function Grid(props) {
                                 const {x_val, y_val, cell_state, my_key} = my_cell
 
                                 let my_class_name = my_key + " Grid_Cell " + cell_state
-                                // if (cell_state === "START") {
-                                //     my_class_name += " Start"
-                                // } 
-                                // else if (cell_state === "END") {
-                                //     my_class_name += " End"
-                                // } 
 
                                 if (props.active_cell_type === "START" ||
                                     props.active_cell_type === "END") {
