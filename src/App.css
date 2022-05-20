@@ -8,12 +8,31 @@ h1 {
     justify-content: center;
 }
 
+
+.AIR_cell_type {
+    background-color: white;
+    border: 3px solid lightblue;
+}
+
+.WALL_cell_type {
+    background-color: darkblue;
+    border: 3px solid darkblue;
+}
+
+.START_cell_type {
+    background-color: green;
+    border: 3px solid green;
+}
+
+.END_cell_type {
+    background-color: red;
+    border: 3px solid red;
+}
+
 .cell_type {
     margin: 1px;
-    border: 3px solid lightblue;
     width: 30px;
     height: 30px;
-    background-color: white;
     border-radius: 15%;
 }
 
@@ -22,22 +41,67 @@ h1 {
     cursor: pointer;
 }
 
-
-.my_cell_type_Wall {
-    background-color: darkblue;
-    border: 3px solid darkblue;
-}
-
-.my_cell_type_Start {
-    background-color: green;
-    border: 3px solid green;
-}
-
-.my_cell_type_End {
-    background-color: red;
-    border: 3px solid red;
-}
-
 .active {
     border: 3px solid orange;
 }
+
+
+
+/* start of slider css */
+
+.slider_div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.slider_properties, .animation_speed_div {
+    display: flex;
+    justify-content: center;
+}
+
+.slider_incrementers {
+    margin: 0;
+    height: 30px;
+    width: 30px;
+}
+
+.animation_speed_display {
+    background-color: lightblue;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+input[type='range']{
+    -webkit-appearance:none;
+    appearance:none;
+    margin:5px;
+    width:calc(250px - 10px);
+    width:-webkit-calc(250px - 10px);
+    height:25px;
+    outline:none;
+    background: lightgray;
+    border-radius: 3px;   
+    overflow: hidden;
+}
+input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance:none;
+    appearance:none;
+    width: 25px;
+    height: 25px;
+    background: darkblue;
+    box-shadow: -100vw 0 0 calc(100vw - 12px) blue;
+    cursor: pointer;
+    border-radius: 3px; 
+    border: 3px solid darkblue;
+}
+
+input[type='range']::-webkit-slider-thumb:hover {
+    border: 3px solid orange;
+}
+
+/* end of slider css */
