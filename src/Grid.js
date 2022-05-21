@@ -13,7 +13,6 @@ const END_CELL_X = 30
 const END_CELL_Y = 10
 
 
-
 let my_start_cell = {
     x_val: START_CELL_X,
     y_val: START_CELL_Y,
@@ -83,9 +82,6 @@ function Grid(props) {
 
     const my_grid_ref = useRef([])
 
-   
-
-    
     const clear_grid = () => {
 
         console.log("clearing grid")
@@ -373,12 +369,240 @@ function Grid(props) {
     }
 
 
+    const random_int = (min, max) => { // min and max included 
+        return Math.floor(Math.random() * (max - min + 1) + min)
+      }
+
+
+    const Recusive_Division_Algorithm = (x, y, vertical_length, horizontal_length) => {
+
+        if (x === undefined || y === undefined) {
+            return
+        }
+
+        if (vertical_length <= 2 || horizontal_length <= 2) {
+            // base case
+            return
+        }
+
+        const { orientation, subdivide } = get_orientation(vertical_length, horizontal_length)
+        console.log("subdividing orientation", orientation)
+        console.log("top left is x =", x, "y =", y)
+        console.log("current vertical_length", vertical_length)
+        console.log("current horizontal_length", horizontal_length)
+
+        const random_divider = random_int(2, subdivide - 2)
+        console.log("random_divider", random_divider)
+
+        let wall_x_start
+        let wall_y_start    
+        let wall_x_end
+        let wall_y_end
+
+        let new_horizontal_length_left
+        let new_vertical_length_left
+        let new_horizontal_length_right
+        let new_vertical_length_right
+
+        let new_x_left
+        let new_y_left
+        let new_x_right
+        let new_y_right
+        if (orientation === "V") {
+            // creating wall bounds
+            wall_x_start = x + random_divider
+            wall_y_start = y
+            wall_x_end = x + random_divider
+            wall_y_end = y + vertical_length
+
+
+            if (vertical_length < horizontal_length) {
+                // subdividing left and right sides
+                // where left means left, right means right
+
+                // left side
+                new_x_left = x
+                new_y_left = y
+
+                new_vertical_length_left = vertical_length
+                new_horizontal_length_left = random_divider - x
+
+                // right side
+                new_x_right = x + random_divider
+                new_y_right = y
+
+                new_vertical_length_right = vertical_length
+                new_horizontal_length_right = horizontal_length - random_divider
+            } else if (vertical_length > horizontal_length) {
+                // subdividing north and south sides
+                // where left means north, right means south
+
+                // north side
+                new_x_left = x
+                new_y_left = y
+
+                new_vertical_length_left = random_divider - y
+                new_horizontal_length_left = horizontal_length
+
+
+                // south side
+                new_x_right = x 
+                new_y_right = y + random_divider
+
+                new_vertical_length_right = vertical_length - random_divider
+                new_horizontal_length_right = horizontal_length
+            }
+
+
+        } else if (orientation === "H") {
+            wall_x_start = x
+            wall_y_start = y + random_divider
+            wall_x_end = x + horizontal_length
+            wall_y_end = y + random_divider
+
+
+            if (vertical_length < horizontal_length) {
+                // subdividing left and right sides
+                // where left means left, right means right
+
+                // left side
+                new_x_left = x
+                new_y_left = y
+
+                new_vertical_length_left = vertical_length
+                new_horizontal_length_left = random_divider - x
+
+                // right side
+                new_x_right = x + random_divider
+                new_y_right = y
+
+                new_vertical_length_right = vertical_length
+                new_horizontal_length_right = horizontal_length - random_divider
+            } else if (vertical_length > horizontal_length) {
+                // subdividing north and south sides
+                // where left means north, right means south
+
+                // north side
+                new_x_left = x
+                new_y_left = y
+
+                new_vertical_length_left = random_divider - y
+                new_horizontal_length_left = horizontal_length
+
+
+                // south side
+                new_x_right = x 
+                new_y_right = y + random_divider
+
+                new_vertical_length_right = vertical_length - random_divider
+                new_horizontal_length_right = horizontal_length
+            }
+
+        }
+
+        place_walls(wall_x_start, wall_y_start, wall_x_end, wall_y_end)
+
+        Recusive_Division_Algorithm(new_x_left, new_y_left, new_vertical_length_left, new_horizontal_length_left)
+        Recusive_Division_Algorithm(new_x_right, new_y_right, new_vertical_length_right, new_horizontal_length_right)
+
+    }
+
+    const get_orientation = (my_height, my_length) => {
+
+        // gets orientation, which value to subdivide and gives height and length so that height < length
+        let orientation
+        let subdivide
+        let height
+        let length
+        if (my_height < my_length) {
+            orientation = "V"
+            subdivide = my_length
+
+            height = my_height
+            length = my_length
+        } else if (my_height > my_length) {
+            orientation = "H"
+            subdivide = my_height
+
+            height = my_length
+            length = my_height
+        } else {
+            if (Math.random() < 0.5) {
+                orientation = "V"
+                subdivide = length
+
+                height = my_height
+                length = my_length
+            } else {
+                orientation = "H"
+                subdivide = my_height
+
+                height = my_length
+                length = my_height
+            }
+        }
+
+        // return { orientation, subdivide, height, length }
+        return { orientation, subdivide }
+    }
+
+    const place_walls = (wall_x_start, wall_y_start, wall_x_end, wall_y_end) => {
+        
+
+        const temp_grid = my_Grid
+
+
+
+        if (wall_x_start === wall_x_end) {
+            const x = wall_x_start
+            const air_cell_y = random_int(wall_y_start, wall_y_end)
+            console.log("placing walls at x", x, "changing y from", wall_y_start, "to", wall_y_end)
+            console.log("air_cell at y =", air_cell_y)
+            for (let y = wall_y_start; y < wall_y_end; y++) {
+    
+                if (y === air_cell_y) {
+                    // still need to make the grid reflect these changes
+                    my_grid_ref.current[y][x].className = temp_grid[y][x].my_key + " Grid_Cell AIR"
+                    temp_grid[y][x].cell_state = "AIR"
+                } else {
+                    my_grid_ref.current[y][x].className = temp_grid[y][x].my_key + " Grid_Cell WALL"
+                    temp_grid[y][x].cell_state = "WALL"
+                }
+                
+            }
+        } else if (wall_y_start === wall_y_end) {
+            const y = wall_y_start
+            const air_cell_x = random_int(wall_x_start, wall_x_end)
+            console.log("placing walls static y", y, "changing x from", wall_x_start, "to", wall_x_end)
+            console.log("air_cell at x =", air_cell_x)
+            for (let x = wall_x_start; x < wall_x_end; x++) {
+    
+                if (x === air_cell_x) {
+                    // still need to make the grid reflect these changes
+                    my_grid_ref.current[y][x].className = temp_grid[y][x].my_key + " Grid_Cell AIR"
+                    temp_grid[y][x].cell_state = "AIR"
+                } else {
+                    my_grid_ref.current[y][x].className = temp_grid[y][x].my_key + " Grid_Cell WALL"
+                    temp_grid[y][x].cell_state = "WALL"
+                }
+                
+            }
+        }
+        
+
+        set_my_Grid(temp_grid)
+        
+        
+    }
+
+
     return (
         <>
             <div className="buttons">
                 <button onClick={A_STAR_Algorithm}>Start A*</button>
                 <button onClick={clear_grid}>Clear Grid</button>
                 <button onClick={clear_visited_and_path_cells}>Clear Path</button>
+                <button onClick={() => Recusive_Division_Algorithm(0, 0, GRID_HEIGHT, GRID_LENGTH)}>Recursive Division Maze</button>
             </div>
 
             

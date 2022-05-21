@@ -103,13 +103,14 @@ button {
         background-color: purple;
     }
 
-    10% {
-        background-color: aqua;
+    20% {
+        background-color: rgb(205, 65, 89);
+        /* background-color: aquamarine; */
     }
 
     50% {
         transform: scale(1.1);
-        background-color: aquamarine;
+        background-color: aqua;
     }
     
 }
