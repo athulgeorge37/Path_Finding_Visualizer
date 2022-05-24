@@ -3,8 +3,10 @@ import { useEffect, useState, useRef } from 'react';
 import "./Grid.css"
 import { PriorityQueue } from "./priority_queue"
 
+// maze works better when dimensions of grid are odd
 const GRID_HEIGHT = 20  // y
 const GRID_LENGTH = 40  // x
+// make it so that grid size depends on user's screen size
 
 const START_CELL_X = 10
 const START_CELL_Y = 10
@@ -73,8 +75,6 @@ const initialise_empty_grid = () => {
 
 
 function Grid(props) {
-    // the grid is only rendered once, grid cell components are updated and rendered for walls
-    // searched areas and paths are updated using getElementByID classnames
 
     // all grid cell objects are kept in this array
     const [my_Grid, set_my_Grid] = useState(initialise_empty_grid)
@@ -82,9 +82,11 @@ function Grid(props) {
 
     const my_grid_ref = useRef([])
 
+
+
     const clear_grid = () => {
 
-        console.log("clearing grid")
+        // console.log("clearing grid")
 
         for (const row of my_Grid) {
             for (const my_cell of row) {
@@ -99,9 +101,6 @@ function Grid(props) {
 
             }
         }
-
-        // console.log("my_start_cell", my_start_cell)
-        // console.log("my_end_cell", my_end_cell)
 
         set_my_Grid(initialise_empty_grid)
     }
@@ -263,7 +262,7 @@ function Grid(props) {
         // console.log("My cell path is", my_cell_path)
 
         // checking if we have found a path
-        if (my_cell_path[0] != my_end_cell) {
+        if (my_cell_path[0] !== my_end_cell) {
             // console.log("could not find the end cell")       
             animate_visited_cells(visited_cells)
         } else {
@@ -311,6 +310,29 @@ function Grid(props) {
         
     }
 
+
+    const animate_wall_cells = (wall_cells) => {
+        // prevents animating when animation speed is low, cus it looks laggy
+        let check_animated = "WALL"
+        if (props.animation_speed > 3) {
+            check_animated = "WALL_Animated"
+        }
+
+        // changing cells to searched area color with a delay
+        for (let k=0; k < wall_cells.length; k++) {
+            setTimeout(() => {
+                const wall_cell = wall_cells[k]
+
+                let wall_class_name =  wall_cell.my_key + " Grid_Cell " + check_animated + " " + wall_cell.cell_state;
+
+                my_grid_ref.current[wall_cell.y_val][wall_cell.x_val].className = wall_class_name
+
+                // animation speed 
+            }, props.animation_speed * k);
+        }
+        
+    }
+
     const animate_path_cells = (my_cell_path, visited_cell_length) => {
         my_cell_path = my_cell_path.reverse()
             // changing cells to path color with a delay
@@ -348,7 +370,7 @@ function Grid(props) {
                 const new_neighbor = my_Grid[new_y][new_x]
 
                 // checking if the neighbor cell is a wall or not
-                if (new_neighbor.cell_state != "WALL") {
+                if (new_neighbor.cell_state !== "WALL") {
                     my_neighbors.push(new_neighbor)
                 }
                 
@@ -369,231 +391,223 @@ function Grid(props) {
     }
 
 
-    const random_int = (min, max) => { // min and max included 
-        return Math.floor(Math.random() * (max - min + 1) + min)
+    const random_odd_number = (max) => { 
+        max -= 1
+
+        let rand_num = Math.floor(Math.random() * (max / 2)) + 
+                       Math.floor(Math.random() * (max / 2))
+
+        if (rand_num % 2 === 0) {
+            if (rand_num === max) {
+                rand_num -= 1
+            } else {
+                rand_num += 1
+            }
+        }
+
+        return rand_num
+
       }
 
 
-    const Recusive_Division_Algorithm = (x, y, vertical_length, horizontal_length) => {
+    let walls_to_render = []
+    const Recursive_Division_Maze = () => {
 
-        if (x === undefined || y === undefined) {
+        // clear_grid()
+        
+        const vertical_len = GRID_HEIGHT
+        const horizontal_len = GRID_LENGTH
+
+        // initial call to the algorithm
+        Recursive_Division_Algorithm(0, 0, vertical_len, horizontal_len)
+
+        // animating the walls_to_render with a delay
+        animate_wall_cells(walls_to_render)
+
+        // updating the state of the cell in the grid
+        const temp_grid = [...my_Grid]
+        for (const wall of walls_to_render) {
+            temp_grid[wall.y_val][wall.x_val].cell_state = "WALL"
+        }        
+        // set_my_Grid(temp_grid)
+    }
+
+    const Recursive_Division_Algorithm = (y, x, vertical_len, horizontal_len) => {
+
+        // x and y represent the top left of the division
+
+        // console.log("y=", y, "x=", x)
+        // console.log("V len:", vertical_len)
+        // console.log("H len:", horizontal_len)
+
+        // base case
+        if (vertical_len < 2 || horizontal_len < 2) {
+            // console.log("stopping")
             return
         }
 
-        if (vertical_length <= 2 || horizontal_length <= 2) {
-            // base case
-            return
+        let direction
+        let division_num // is the number at which the wall will be placed
+
+        // finding the direction to divide
+        if (vertical_len > horizontal_len) {
+            direction = "H"
+            division_num = random_odd_number(vertical_len)
+        } else if (vertical_len <= horizontal_len) {
+            direction = "V"
+            division_num = random_odd_number(horizontal_len)
         }
 
-        const { orientation, subdivide } = get_orientation(vertical_length, horizontal_length)
-        console.log("subdividing orientation", orientation)
-        console.log("top left is x =", x, "y =", y)
-        console.log("current vertical_length", vertical_length)
-        console.log("current horizontal_length", horizontal_length)
 
-        const random_divider = random_int(2, subdivide - 2)
-        console.log("random_divider", random_divider)
+        if (direction === "V") {
+            // place walls
+            get_walls(
+                x + division_num,           // x_start 
+                y,                          // y_start
+                x + division_num,           // x_end
+                y + vertical_len - 1,       // y_end
 
-        let wall_x_start
-        let wall_y_start    
-        let wall_x_end
-        let wall_y_end
+                vertical_len, 
+                horizontal_len
+            )
 
-        let new_horizontal_length_left
-        let new_vertical_length_left
-        let new_horizontal_length_right
-        let new_vertical_length_right
+            // console.log("dividing left of V")
+            Recursive_Division_Algorithm(
+                y,              // new y
+                x,             // new x
 
-        let new_x_left
-        let new_y_left
-        let new_x_right
-        let new_y_right
-        if (orientation === "V") {
-            // creating wall bounds
-            wall_x_start = x + random_divider
-            wall_y_start = y
-            wall_x_end = x + random_divider
-            wall_y_end = y + vertical_length
+                vertical_len,       // new vertical_len
+                division_num,      // new horizontal_len
+            )
 
+            // console.log("dividing right of V")
+            Recursive_Division_Algorithm(
+                y,                          // new y
+                x + division_num + 1,      // new x
 
-            if (vertical_length < horizontal_length) {
-                // subdividing left and right sides
-                // where left means left, right means right
+                vertical_len,                                       // new vertical_len
+                (x + horizontal_len) - (x + division_num + 1),     // new horizontal_len
+            )
 
-                // left side
-                new_x_left = x
-                new_y_left = y
+        } else if (direction === "H") {
+            // place walls
+            get_walls(
+                x,                               // x_start
+                y + division_num,                // y_start
+                x + horizontal_len - 1,          // x_end
+                y + division_num,                // y_end
 
-                new_vertical_length_left = vertical_length
-                new_horizontal_length_left = random_divider - x
+                vertical_len, 
+                horizontal_len
+            )
 
-                // right side
-                new_x_right = x + random_divider
-                new_y_right = y
+            // console.log("dividing north of H")
+            Recursive_Division_Algorithm(
+                y,       // new y
+                x,      // new x
 
-                new_vertical_length_right = vertical_length
-                new_horizontal_length_right = horizontal_length - random_divider
-            } else if (vertical_length > horizontal_length) {
-                // subdividing north and south sides
-                // where left means north, right means south
-
-                // north side
-                new_x_left = x
-                new_y_left = y
-
-                new_vertical_length_left = random_divider - y
-                new_horizontal_length_left = horizontal_length
+                division_num,           // new vertical_len
+                horizontal_len,        // new horizontal_len
+            )
 
 
-                // south side
-                new_x_right = x 
-                new_y_right = y + random_divider
-
-                new_vertical_length_right = vertical_length - random_divider
-                new_horizontal_length_right = horizontal_length
-            }
-
-
-        } else if (orientation === "H") {
-            wall_x_start = x
-            wall_y_start = y + random_divider
-            wall_x_end = x + horizontal_length
-            wall_y_end = y + random_divider
-
-
-            if (vertical_length < horizontal_length) {
-                // subdividing left and right sides
-                // where left means left, right means right
-
-                // left side
-                new_x_left = x
-                new_y_left = y
-
-                new_vertical_length_left = vertical_length
-                new_horizontal_length_left = random_divider - x
-
-                // right side
-                new_x_right = x + random_divider
-                new_y_right = y
-
-                new_vertical_length_right = vertical_length
-                new_horizontal_length_right = horizontal_length - random_divider
-            } else if (vertical_length > horizontal_length) {
-                // subdividing north and south sides
-                // where left means north, right means south
-
-                // north side
-                new_x_left = x
-                new_y_left = y
-
-                new_vertical_length_left = random_divider - y
-                new_horizontal_length_left = horizontal_length
-
-
-                // south side
-                new_x_right = x 
-                new_y_right = y + random_divider
-
-                new_vertical_length_right = vertical_length - random_divider
-                new_horizontal_length_right = horizontal_length
-            }
-
+            // console.log("dividing south of H")
+            Recursive_Division_Algorithm(
+                y + division_num + 1,       // new y
+                x,                         // new x
+     
+                (y + vertical_len) - (y + division_num + 1),     // new vertical_len
+                horizontal_len,                                 // new horizontal_len
+            )
         }
-
-        place_walls(wall_x_start, wall_y_start, wall_x_end, wall_y_end)
-
-        Recusive_Division_Algorithm(new_x_left, new_y_left, new_vertical_length_left, new_horizontal_length_left)
-        Recusive_Division_Algorithm(new_x_right, new_y_right, new_vertical_length_right, new_horizontal_length_right)
 
     }
 
-    const get_orientation = (my_height, my_length) => {
+    const random_even_number_in_range = (min, max) => {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        let randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
 
-        // gets orientation, which value to subdivide and gives height and length so that height < length
-        let orientation
-        let subdivide
-        let height
-        let length
-        if (my_height < my_length) {
-            orientation = "V"
-            subdivide = my_length
-
-            height = my_height
-            length = my_length
-        } else if (my_height > my_length) {
-            orientation = "H"
-            subdivide = my_height
-
-            height = my_length
-            length = my_height
-        } else {
-            if (Math.random() < 0.5) {
-                orientation = "V"
-                subdivide = length
-
-                height = my_height
-                length = my_length
+        if (randomNum % 2 !== 0) {
+            if (randomNum === max) {
+              randomNum -= 1
             } else {
-                orientation = "H"
-                subdivide = my_height
-
-                height = my_length
-                length = my_height
+              randomNum += 1
             }
-        }
-
-        // return { orientation, subdivide, height, length }
-        return { orientation, subdivide }
+          }
+        
+          return randomNum
     }
 
-    const place_walls = (wall_x_start, wall_y_start, wall_x_end, wall_y_end) => {
-        
+    const get_walls = (x_start, y_start, x_end, y_end, vertical_len, horizontal_len) => {
 
-        const temp_grid = my_Grid
+        // for vertical walls
+        if (x_start === x_end) {
 
+            // only creating walls if vertical_len is greater than 2
+            if (vertical_len === 2) {
+                return
+            }
 
+            const x = x_start
+            const air_cell_y = random_even_number_in_range(y_start, y_end)
 
-        if (wall_x_start === wall_x_end) {
-            const x = wall_x_start
-            const air_cell_y = random_int(wall_y_start, wall_y_end)
-            console.log("placing walls at x", x, "changing y from", wall_y_start, "to", wall_y_end)
-            console.log("air_cell at y =", air_cell_y)
-            for (let y = wall_y_start; y < wall_y_end; y++) {
-    
+            // console.log("V walls between y", y_start, "and", y_end, "where x =", x)
+            // console.log("air_cell at y =", air_cell_y)
+
+            for (let y = y_start; y < y_end + 1; y++) {
+
+                // not adding walls at the start or end cells
+                if ((x === my_start_cell.x_val && y === my_start_cell.y_val) ||
+                    (x === my_end_cell.x_val && y === my_end_cell.y_val)) {
+                    continue
+                }
+
+                // creating a gap in the wall in order to create the maze
                 if (y === air_cell_y) {
-                    // still need to make the grid reflect these changes
-                    my_grid_ref.current[y][x].className = temp_grid[y][x].my_key + " Grid_Cell AIR"
-                    temp_grid[y][x].cell_state = "AIR"
-                } else {
-                    my_grid_ref.current[y][x].className = temp_grid[y][x].my_key + " Grid_Cell WALL"
-                    temp_grid[y][x].cell_state = "WALL"
+                    continue
                 }
-                
+
+                // addings the wall cells to a list to be animated in order    
+                walls_to_render.push(my_Grid[y][x])
+
             }
-        } else if (wall_y_start === wall_y_end) {
-            const y = wall_y_start
-            const air_cell_x = random_int(wall_x_start, wall_x_end)
-            console.log("placing walls static y", y, "changing x from", wall_x_start, "to", wall_x_end)
-            console.log("air_cell at x =", air_cell_x)
-            for (let x = wall_x_start; x < wall_x_end; x++) {
-    
-                if (x === air_cell_x) {
-                    // still need to make the grid reflect these changes
-                    my_grid_ref.current[y][x].className = temp_grid[y][x].my_key + " Grid_Cell AIR"
-                    temp_grid[y][x].cell_state = "AIR"
-                } else {
-                    my_grid_ref.current[y][x].className = temp_grid[y][x].my_key + " Grid_Cell WALL"
-                    temp_grid[y][x].cell_state = "WALL"
+        } 
+        // for horizontal walls
+        else if (y_start === y_end) {
+
+            // only creating walls if horizontal_len is greater than 2
+            if (horizontal_len === 2) {
+                return
+            }
+
+            const y = y_start
+            const air_cell_x = random_even_number_in_range(x_start, x_end)
+
+            // console.log("H walls between x", x_start, "and", x_end, "where y =", y)
+            // console.log("air_cell at x =", air_cell_x)
+
+            for (let x = x_start; x < x_end + 1; x++) {
+
+                // not adding walls at the start or end cells
+                if ((x === my_start_cell.x_val && y === my_start_cell.y_val) ||
+                    (x === my_end_cell.x_val && y === my_end_cell.y_val)) {
+                        
+                    continue
                 }
-                
+
+                // creating a gap in the wall in order to create the maze
+                if (x === air_cell_x) {
+                    continue
+                }
+
+                // addings the wall cells to a list to be animated in order
+                walls_to_render.push(my_Grid[y][x])
+
             }
         }
-        
-
-        set_my_Grid(temp_grid)
-        
-        
     }
+
 
 
     return (
@@ -602,7 +616,7 @@ function Grid(props) {
                 <button onClick={A_STAR_Algorithm}>Start A*</button>
                 <button onClick={clear_grid}>Clear Grid</button>
                 <button onClick={clear_visited_and_path_cells}>Clear Path</button>
-                <button onClick={() => Recusive_Division_Algorithm(0, 0, GRID_HEIGHT, GRID_LENGTH)}>Recursive Division Maze</button>
+                <button onClick={Recursive_Division_Maze}>Recursive Division Maze</button>
             </div>
 
             
@@ -637,14 +651,15 @@ function Grid(props) {
                                         key={my_key}
                                         className={my_class_name}
                                         ref={(element) => {
-                                            // console.log(element)
-                                            // console.log(cell_index)
+                                            // console.log("element:", element)
                                             my_grid_ref.current[row_ID][cell_index] = element;
                                         }}
 
                                         onMouseDown={() => handle_mouse_down(x_val, y_val, my_key)}
                                         onMouseEnter={() => handle_mouse_enter(x_val, y_val, my_key)}
                                         onMouseUp={() => handle_mouse_up()}
+                                    // >{y_val},{x_val}</div>
+                                    // >{y_val + 1},{x_val + 1}</div>
                                     />
                                 )
 

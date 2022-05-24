@@ -2,7 +2,7 @@ import './App.css';
 import { useState } from "react";
 import Grid from "./Grid";
 
-const DELAY_ANIMATION = 10   // was 5
+const DELAY_ANIMATION = 5   // was 10
 
 // this is where we will add all the components of the project
 function App() {
@@ -11,7 +11,7 @@ function App() {
 		active_cell: "WALL",
 		cell_types: ["WALL", "AIR", "START", "END"]
 	});
-	
+
 	const [animation_speed, set_animation_speed] = useState(DELAY_ANIMATION)
 
 

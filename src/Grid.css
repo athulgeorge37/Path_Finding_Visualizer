@@ -21,13 +21,22 @@ button {
 }
 
 
-.Grid_Cell {
+/* .Grid_Cell {
     margin: 1px;
     border: 1px solid lightblue;
+
     width: 30px;
     height: 30px;
     border-radius: 15%;
+} */
+
+.Grid_Cell {
+    border: 1px solid lightblue;
+
+    width: 30px;
+    height: 30px;
 }
+  
   
 .AIR {
     background-color: white;
@@ -38,6 +47,13 @@ button {
     background-color: darkblue;
     border: 1px solid darkblue;
 }
+
+.WALL_Animated {
+    background-color: darkblue;
+    /* border: 1px solid darkblue; */
+    animation: animate_path 0.5s ease-in-out 0s;
+}
+
 
 .Visited {
     background-color: lightblue;
@@ -81,32 +97,11 @@ button {
 
 @keyframes animate_visited {
 
-    /* 0% {
-        transform: scale(0.2);
-        background-color: purple;
-        border-radius: 50%;
-        transform: rotate(90deg);
-    }
-
-    10% {
-        background-color: aqua;
-    }
-
-    50% {
-        transform: scale(1.2);
-        transform: rotate(180deg);
-        background-color: aquamarine;
-    } */
-
     0% {
         transform: scale(0.4);
         background-color: purple;
     }
 
-    20% {
-        background-color: rgb(205, 65, 89);
-        /* background-color: aquamarine; */
-    }
 
     50% {
         transform: scale(1.1);
