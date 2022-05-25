@@ -3,6 +3,7 @@
     flex-direction: column;
     align-items: center;
     margin-top: 2rem;
+    margin-bottom: 2rem;
 }
 
 .Grid_Row {
@@ -31,7 +32,7 @@ button {
 } */
 
 .Grid_Cell {
-    border: 1px solid lightblue;
+    border: 0.5px solid lightblue;
 
     width: 30px;
     height: 30px;
@@ -40,12 +41,12 @@ button {
   
 .AIR {
     background-color: white;
-    border: 1px solid lightblue;
+    border: 0.5px solid lightblue;
 }
   
 .WALL {
     background-color: darkblue;
-    border: 1px solid darkblue;
+    border: 0.5px solid darkblue;
 }
 
 .WALL_Animated {
@@ -66,19 +67,19 @@ button {
 
 .Path {
     background-color: rgb(224, 118, 19);
-    border: 1px solid rgb(224, 118, 19);
+    border: 0.5px solid rgb(224, 118, 19);
     animation: animate_path 1s ease-in-out 0s;
 }
 
 .START {
     background-color: green;
-    border: 1px solid green;
+    border: 0.5px solid green;
     animation: animate_start_end 0.25s ease-in-out 0s;
 }
 
 .END {
     background-color: red;
-    border: 1px solid red;
+    border: 0.5px solid red;
     animation: animate_start_end 0.25s ease-in-out 0s;
 }
 
