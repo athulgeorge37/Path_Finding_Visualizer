@@ -1,5 +1,5 @@
 // import Grid_Cell from "./Grid_Cell"
-import { useEffect, useState, useRef, Component } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import "./Grid.css"
 import { PriorityQueue } from "./priority_queue"
 import { Queue } from "./queue"
@@ -33,6 +33,7 @@ let my_end_cell = {
     cell_state: "END"
 }
 
+let middle_stops = []
 
 const initialise_empty_grid = () => {
 
@@ -108,9 +109,6 @@ function Grid(props) {
         set_my_Grid(initialise_empty_grid)
     }
 
-    const Add_Stop = () => {
-        
-    }
 
 
     const identify_cell_type = (my_key, x, y) => {
@@ -127,7 +125,12 @@ function Grid(props) {
             }
         }
 
-        
+        if (props.active_cell_type === "MIDDLE") {
+
+            // adding all middle stops to a list, so search algorithms visit all of them
+            middle_stops.push(my_Grid[y][x])
+
+        }
 
         if (props.active_cell_type === "START") {
 
@@ -157,6 +160,8 @@ function Grid(props) {
             // new start cell with appropriate updates
             my_end_cell = my_Grid[y][x]
 
+            // adding all middle stops to a list, so search algorithms visit all of them
+            middle_stops.push(my_Grid[y][x])
         }
 
         if (can_be_updated) {
@@ -203,8 +208,12 @@ function Grid(props) {
         for (const row of my_Grid) {
             for (const my_cell of row) {
                 const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
-                if ((current_classname.includes("Path") || current_classname.includes("Visited")) &&
-                    !(current_classname.includes("START") || current_classname.includes("END"))) {
+                // if ((current_classname.includes("Path") || current_classname.includes("Visited")) &&
+                //     !(current_classname.includes("START") || current_classname.includes("END"))) {
+
+                //     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell AIR";
+                // }
+                if (!(current_classname.includes("START") || current_classname.includes("END") || current_classname.includes("WALL"))) {
 
                     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell AIR";
                 }
@@ -213,17 +222,65 @@ function Grid(props) {
     }
 
 
-    const Breadth_first_search = () => {
+
+    const Start_Search_Algorithm = (algorithm) => {
 
         my_grid_ref.current[0][0].scrollIntoView()
-
         clear_visited_and_path_cells()
+
+        middle_stops.push(my_end_cell)
+        if (algorithm === "A*") {
+
+            // console.log("middle_stops", middle_stops)
+
+            const all_valid_paths = []
+
+            let time_finished = 0            
+            let curr_start = my_start_cell
+            for (let k = 0; k < middle_stops.length; k++) {
+                
+                console.log("starting algo", k, "passsing time_finished as", time_finished)
+                const [tf, valid_path, my_cell_path] = A_Star_Algorithm(curr_start, middle_stops[k], time_finished)
+                time_finished = tf + props.animation_speed
+                // await sleep(k * 1000);
+
+                if (valid_path) {
+                    all_valid_paths.push(my_cell_path)
+                }
+
+                console.log("algo", k, "finished at", time_finished)
+                curr_start = middle_stops[k]
+            }
+
+            for (const cell_path of all_valid_paths) {
+                time_finished = animate_path_cells(cell_path, time_finished) + props.animation_speed
+            }
+
+
+            
+        } else if  (algorithm === "Breadth_First_Search") {
+
+            let curr_start = my_start_cell
+            for (let k = 0; k < middle_stops.length; k++) {
+
+                Breadth_first_search(curr_start, middle_stops[k])
+
+                curr_start = middle_stops[k]
+            }
+        }
+
+        middle_stops = []
+
+    }
+
+    const Breadth_first_search = (start_cell, end_cell) => {
+
         
         let my_queue = new Queue();
-        my_queue.enqueue(my_start_cell)
+        my_queue.enqueue(start_cell)
 
         let came_from = {}
-        came_from[my_start_cell.my_key] = null
+        came_from[start_cell.my_key] = null
 
         const visited_cells = []
 
@@ -231,7 +288,7 @@ function Grid(props) {
         while (!my_queue.isEmpty()) {
             current_cell = my_queue.dequeue()
 
-            if (current_cell === my_end_cell) {
+            if (current_cell === end_cell) {
                 // end cell found, breaking out of while loop
                 break
             }
@@ -249,7 +306,7 @@ function Grid(props) {
         const my_cell_path = construct_path(current_cell, came_from)
 
         // checking if we have found a path
-        if (my_cell_path[0] !== my_end_cell) {
+        if (my_cell_path[0] !== end_cell) {
             // console.log("could not find the end cell")       
             animate_visited_cells(visited_cells)
         } else {
@@ -261,23 +318,19 @@ function Grid(props) {
 
     }
 
-    const A_STAR_Algorithm = () => {
+    const A_Star_Algorithm = (start_cell, end_cell, time_finished) => {
         // console.log("Starting A Star Algo")
-
-        my_grid_ref.current[0][0].scrollIntoView()
-
-        clear_visited_and_path_cells()
         
         let my_queue = new PriorityQueue();      
 
-        my_queue.enqueue(my_start_cell, 0)
+        my_queue.enqueue(start_cell, 0)
 
         let came_from = {} // a dictionary of values containing where each cell originated from of type(cell)
-        came_from[my_start_cell.my_key] = null
+        came_from[start_cell.my_key] = null
 
         let cost_so_far = {} // a dictionary containing the cell as the key 
         // and the distance from start cell to the current cell as the value
-        cost_so_far[my_start_cell.my_key] = 0
+        cost_so_far[start_cell.my_key] = 0
 
         const visited_cells = []
 
@@ -285,7 +338,7 @@ function Grid(props) {
         while (!my_queue.isEmpty()) {
             current_cell = my_queue.dequeue().element
 
-            if (current_cell === my_end_cell) {
+            if (current_cell === end_cell) {
                 // end cell found, breaking out of while loop
                 break
             }
@@ -297,12 +350,12 @@ function Grid(props) {
                 // adding each neighbor cell to visited cell to animate them later
                 visited_cells.push(neighbor_cell)
 
-                const new_cost = cost_so_far[current_cell.my_key]
-                //  const new_cost = cost_so_far[current_cell.my_key] + 1
+                // const new_cost = cost_so_far[current_cell.my_key]
+                const new_cost = cost_so_far[current_cell.my_key] + 1
 
                 if ((!(neighbor_cell.my_key in cost_so_far)) || (new_cost < cost_so_far[neighbor_cell.my_key])) {
                     cost_so_far[neighbor_cell.my_key] = new_cost
-                    const priority = new_cost + heuristic(neighbor_cell)
+                    const priority = new_cost + manhattan_distance(neighbor_cell, end_cell)
                     neighbor_cell.priority = priority
                     my_queue.enqueue(neighbor_cell, priority)
                     came_from[neighbor_cell.my_key] = current_cell
@@ -315,17 +368,21 @@ function Grid(props) {
 
         // console.log("My cell path is", my_cell_path)
 
-        // checking if we have found a path
-        if (my_cell_path[0] !== my_end_cell) {
-            // console.log("could not find the end cell")       
-            animate_visited_cells(visited_cells)
-        } else {
-            // console.log("end cell found")
+        // // checking if we have found a path
+        // if (my_cell_path[0] !== end_cell) {
+        //     // console.log("could not find the end cell")       
+        //     time_finished = animate_visited_cells(visited_cells, time_finished)
+        // } else {
+        //     // console.log("end cell found")
 
-            animate_visited_cells(visited_cells)
-            animate_path_cells(my_cell_path, visited_cells.length)
+        //     time_finished = animate_visited_cells(visited_cells, time_finished)
+        //     time_finished = animate_path_cells(my_cell_path, time_finished)
             
-        }
+        // }
+
+        time_finished = animate_visited_cells(visited_cells, time_finished)
+
+        return [time_finished, my_cell_path[0] === end_cell, my_cell_path]
     }
 
 
@@ -342,7 +399,7 @@ function Grid(props) {
     }
 
 
-    const animate_visited_cells = (visited_cells) => {
+    const animate_visited_cells = (visited_cells, time_finished) => {
         // prevents animating when animation speed is low, cus it looks laggy
         let check_animated = "Visited"
         if (props.animation_speed > 3) {
@@ -350,7 +407,13 @@ function Grid(props) {
         }
 
         // changing cells to searched area color with a delay
+        let last_time
         for (let k=0; k < visited_cells.length; k++) {
+
+            last_time = time_finished + props.animation_speed * k
+
+            console.log("animate_visited_cells", time_finished + props.animation_speed * k)
+
             setTimeout(() => {
                 const neighbor_cell = visited_cells[k]
 
@@ -358,10 +421,14 @@ function Grid(props) {
 
                 my_grid_ref.current[neighbor_cell.y_val][neighbor_cell.x_val].className = visited_class_name
 
+
                 // animation speed 
-            }, props.animation_speed * k);
+            }, last_time);
+            
         }
         
+        console.log("last_time at animate_visited_cells", last_time)
+        return last_time
     }
 
 
@@ -387,7 +454,7 @@ function Grid(props) {
         
     }
 
-    const animate_path_cells = (my_cell_path, visited_cell_length) => {
+    const animate_path_cells = (my_cell_path, time_finished) => {
 
         // let constant_delay = 130
 
@@ -403,8 +470,14 @@ function Grid(props) {
 
         my_cell_path = my_cell_path.reverse()
         // changing cells to path color with a delay
-        const visited_animation_end_time = visited_cell_length * props.animation_speed
+        // const visited_animation_end_time = visited_cell_length * props.animation_speed
+        let last_time
+        console.log("time_finished at animate_path_cells", time_finished)
         for (let n=0; n < my_cell_path.length; n++) {
+
+            last_time = time_finished + (50 * n)
+            console.log("animate_path_cells", last_time)
+
             setTimeout(() => {
                 const my_cell = my_cell_path[n]
 
@@ -414,9 +487,11 @@ function Grid(props) {
 
                 // path animation speed will remain the same no mater what animation speed given
                 // this is to prevent really slow and really fast path speeds
-            }, visited_animation_end_time + (50 * n));
-
+            }, last_time);
+            
         }
+
+        return last_time
     }
 
 
@@ -452,9 +527,9 @@ function Grid(props) {
     }
 
 
-    const heuristic = (cell) => {
+    const manhattan_distance = (cell_a, cell_b) => {
         // estimates the L distance from a particalar cell to the end cell
-        return Math.abs(my_end_cell.x_val - cell.x_val) + Math.abs(my_end_cell.y_val - cell.y_val)
+        return Math.abs(cell_a.x_val - cell_b.x_val) + Math.abs(cell_a.y_val - cell_b.y_val)
     }
 
 
@@ -735,13 +810,12 @@ function Grid(props) {
         return walls_to_render
     }
 
-// Breadth_first_search
 
     return (
         <>
             <div className="buttons">
-            <button onClick={Breadth_first_search}>Breadth First Search</button>
-                <button onClick={A_STAR_Algorithm}>Start A*</button>
+            <button onClick={() => Start_Search_Algorithm("Breadth_First_Search")}>Breadth First Search</button>
+                <button onClick={() => Start_Search_Algorithm("A*")}>Start A*</button>
                 <button onClick={clear_grid}>Clear Grid</button>
                 <button onClick={clear_visited_and_path_cells}>Clear Path</button>
 
@@ -751,7 +825,6 @@ function Grid(props) {
 
                 <button onClick={Scattered_Maze}>Scattered Maze</button>
 
-                <button onClick={Add_Stop}>Add Stop</button>
             </div>
 
             <div className="Grid">
@@ -765,7 +838,8 @@ function Grid(props) {
                                 let my_class_name = my_key + " Grid_Cell " + cell_state
 
                                 if (props.active_cell_type === "START" ||
-                                    props.active_cell_type === "END") {
+                                    props.active_cell_type === "END" ||
+                                    props.active_cell_type === "MIDDLE") {
                                     return (
                                         <div
                                             key={my_key}

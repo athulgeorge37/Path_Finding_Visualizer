@@ -77,6 +77,12 @@ button {
     animation: animate_start_end 0.25s ease-in-out 0s;
 }
 
+.MIDDLE {
+    background-color: yellow;
+    border: 0.5px solid yellow;
+    animation: animate_start_end 0.25s ease-in-out 0s;
+}
+
 .END {
     background-color: red;
     border: 0.5px solid red;

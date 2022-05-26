@@ -9,7 +9,7 @@ function App() {
 
 	const [my_cell_type, set_cell_type] = useState({
 		active_cell: "WALL",
-		cell_types: ["WALL", "AIR", "START", "END"]
+		cell_types: ["WALL", "AIR", "START", "MIDDLE", "END"]
 	});
 
 	const [animation_speed, set_animation_speed] = useState(DELAY_ANIMATION)
