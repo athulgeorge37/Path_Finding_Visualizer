@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef, Component } from 'react';
 import "./Grid.css"
 import { PriorityQueue } from "./priority_queue"
+import { Queue } from "./queue"
 
 // maze works better when dimensions of grid are odd
 const GRID_HEIGHT = 21  // y
@@ -74,10 +75,6 @@ const initialise_empty_grid = () => {
     return empty_grid
 }
 
-const getWindowDimensions = () => {
-    return { width: window.innerWidth, height: window.innerHeight }
-}
-
 function Grid(props) {
 
     // all grid cell objects are kept in this array
@@ -109,6 +106,10 @@ function Grid(props) {
         }
 
         set_my_Grid(initialise_empty_grid)
+    }
+
+    const Add_Stop = () => {
+        
     }
 
 
@@ -212,6 +213,54 @@ function Grid(props) {
     }
 
 
+    const Breadth_first_search = () => {
+
+        my_grid_ref.current[0][0].scrollIntoView()
+
+        clear_visited_and_path_cells()
+        
+        let my_queue = new Queue();
+        my_queue.enqueue(my_start_cell)
+
+        let came_from = {}
+        came_from[my_start_cell.my_key] = null
+
+        const visited_cells = []
+
+        let current_cell = null
+        while (!my_queue.isEmpty()) {
+            current_cell = my_queue.dequeue()
+
+            if (current_cell === my_end_cell) {
+                // end cell found, breaking out of while loop
+                break
+            }
+
+            for (const neighbor_cell of generate_neighbor_cells(current_cell)) {
+                visited_cells.push(neighbor_cell)
+                if (!(neighbor_cell.my_key in came_from)) {
+                    my_queue.enqueue(neighbor_cell)
+                    came_from[neighbor_cell.my_key] = current_cell
+                }
+            }
+        }
+
+        // constructing the path
+        const my_cell_path = construct_path(current_cell, came_from)
+
+        // checking if we have found a path
+        if (my_cell_path[0] !== my_end_cell) {
+            // console.log("could not find the end cell")       
+            animate_visited_cells(visited_cells)
+        } else {
+            // console.log("end cell found")
+
+            animate_visited_cells(visited_cells)
+            animate_path_cells(my_cell_path, visited_cells.length)
+        }
+
+    }
+
     const A_STAR_Algorithm = () => {
         // console.log("Starting A Star Algo")
 
@@ -248,8 +297,8 @@ function Grid(props) {
                 // adding each neighbor cell to visited cell to animate them later
                 visited_cells.push(neighbor_cell)
 
-                 // const new_cost = cost_so_far[current_cell.my_key]
-                 const new_cost = cost_so_far[current_cell.my_key] + 1
+                const new_cost = cost_so_far[current_cell.my_key]
+                //  const new_cost = cost_so_far[current_cell.my_key] + 1
 
                 if ((!(neighbor_cell.my_key in cost_so_far)) || (new_cost < cost_so_far[neighbor_cell.my_key])) {
                     cost_so_far[neighbor_cell.my_key] = new_cost
@@ -429,7 +478,7 @@ function Grid(props) {
 
 
     const Scattered_Maze = () => {
-        
+
         const walls_to_render = []
 
         for (const row of my_Grid) {
@@ -441,7 +490,7 @@ function Grid(props) {
                 }
 
                 // if random number smaller than 0.33 then it is a wall
-                if (Math.random() < 0.35) {
+                if (Math.random() < 0.30) {
                     walls_to_render.push(cell)
                 }
             }
@@ -686,11 +735,12 @@ function Grid(props) {
         return walls_to_render
     }
 
-
+// Breadth_first_search
 
     return (
         <>
             <div className="buttons">
+            <button onClick={Breadth_first_search}>Breadth First Search</button>
                 <button onClick={A_STAR_Algorithm}>Start A*</button>
                 <button onClick={clear_grid}>Clear Grid</button>
                 <button onClick={clear_visited_and_path_cells}>Clear Path</button>
@@ -700,6 +750,8 @@ function Grid(props) {
                 <button onClick={() => Recursive_Division_Maze("V")}>Recursive Division Vertical Skew</button>
 
                 <button onClick={Scattered_Maze}>Scattered Maze</button>
+
+                <button onClick={Add_Stop}>Add Stop</button>
             </div>
 
             <div className="Grid">
