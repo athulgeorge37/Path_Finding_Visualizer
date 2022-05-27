@@ -10,10 +10,10 @@ const GRID_WIDTH = 45  // x
 // make it so that grid size depends on user's screen size
 
 // these are the default start and end values when page initially reloads
-const START_CELL_X = 10
+const START_CELL_X = 12
 const START_CELL_Y = 10
 
-const END_CELL_X = 30
+const END_CELL_X = 32
 const END_CELL_Y = 10
 
 
@@ -105,7 +105,7 @@ function Grid(props) {
 
             }
         }
-
+        
         set_my_Grid(initialise_empty_grid)
     }
 
@@ -119,20 +119,16 @@ function Grid(props) {
 
         // preventing user from making a start/end cell into a wall/air cell
         if (props.active_cell_type === "AIR" || props.active_cell_type === "WALL") {
-            if (prev_cell_state === "START" || prev_cell_state === "END") {
+            if (prev_cell_state === "START" || prev_cell_state === "END" || prev_cell_state === "MIDDLE") {
                 new_class_name += prev_cell_state
                 can_be_updated = false
             }
-        }
-
-        if (props.active_cell_type === "MIDDLE") {
+        } else if (props.active_cell_type === "MIDDLE") {
 
             // adding all middle stops to a list, so search algorithms visit all of them
             middle_stops.push(my_Grid[y][x])
 
-        }
-
-        if (props.active_cell_type === "START") {
+        } else if (props.active_cell_type === "START") {
 
             // updating cell state of old start cell in the grid
             my_Grid[my_start_cell.y_val][my_start_cell.x_val].cell_state = "AIR"
@@ -213,7 +209,12 @@ function Grid(props) {
 
                 //     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell AIR";
                 // }
-                if (!(current_classname.includes("START") || current_classname.includes("END") || current_classname.includes("WALL"))) {
+                // if (!(current_classname.includes("START") || current_classname.includes("END") || current_classname.includes("WALL"))) {
+
+                //     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell AIR";
+                // }
+
+                if (current_classname.includes("AIR")) {
 
                     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell AIR";
                 }
@@ -229,29 +230,37 @@ function Grid(props) {
         clear_visited_and_path_cells()
 
         middle_stops.push(my_end_cell)
+
         if (algorithm === "A*") {
 
             // console.log("middle_stops", middle_stops)
 
             const all_valid_paths = []
+            const all_visited_cells = []
 
             let time_finished = 0            
             let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
                 
-                console.log("starting algo", k, "passsing time_finished as", time_finished)
-                const [tf, valid_path, my_cell_path] = A_Star_Algorithm(curr_start, middle_stops[k], time_finished)
-                time_finished = tf + props.animation_speed
-                // await sleep(k * 1000);
+                const [valid_path, my_cell_path, visited_cells] = A_Star_Algorithm(curr_start, middle_stops[k])
+
+                time_finished += props.animation_speed
+
+                all_visited_cells.push(visited_cells)
 
                 if (valid_path) {
                     all_valid_paths.push(my_cell_path)
                 }
 
-                console.log("algo", k, "finished at", time_finished)
                 curr_start = middle_stops[k]
             }
 
+            // animating the visited cells
+            for (const visited_cells of all_visited_cells) {
+                time_finished = animate_visited_cells(visited_cells, time_finished) + props.animation_speed
+            }
+
+             // animating the path cells
             for (const cell_path of all_valid_paths) {
                 time_finished = animate_path_cells(cell_path, time_finished) + props.animation_speed
             }
@@ -260,12 +269,42 @@ function Grid(props) {
             
         } else if  (algorithm === "Breadth_First_Search") {
 
+            // let curr_start = my_start_cell
+            // for (let k = 0; k < middle_stops.length; k++) {
+
+            //     Breadth_first_search(curr_start, middle_stops[k])
+
+            //     curr_start = middle_stops[k]
+            // }
+
+            const all_valid_paths = []
+            const all_visited_cells = []
+
+            let time_finished = 0            
             let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
+                
+                const [valid_path, my_cell_path, visited_cells] = Breadth_first_search(curr_start, middle_stops[k])
 
-                Breadth_first_search(curr_start, middle_stops[k])
+                time_finished += props.animation_speed
+
+                all_visited_cells.push(visited_cells)
+
+                if (valid_path) {
+                    all_valid_paths.push(my_cell_path)
+                }
 
                 curr_start = middle_stops[k]
+            }
+
+            // animating the visited cells
+            for (const visited_cells of all_visited_cells) {
+                time_finished = animate_visited_cells(visited_cells, time_finished) + props.animation_speed
+            }
+
+             // animating the path cells
+            for (const cell_path of all_valid_paths) {
+                time_finished = animate_path_cells(cell_path, time_finished) + props.animation_speed
             }
         }
 
@@ -305,20 +344,10 @@ function Grid(props) {
         // constructing the path
         const my_cell_path = construct_path(current_cell, came_from)
 
-        // checking if we have found a path
-        if (my_cell_path[0] !== end_cell) {
-            // console.log("could not find the end cell")       
-            animate_visited_cells(visited_cells)
-        } else {
-            // console.log("end cell found")
-
-            animate_visited_cells(visited_cells)
-            animate_path_cells(my_cell_path, visited_cells.length)
-        }
-
+        return [my_cell_path[0] === end_cell, my_cell_path, visited_cells]
     }
 
-    const A_Star_Algorithm = (start_cell, end_cell, time_finished) => {
+    const A_Star_Algorithm = (start_cell, end_cell) => {
         // console.log("Starting A Star Algo")
         
         let my_queue = new PriorityQueue();      
@@ -365,24 +394,9 @@ function Grid(props) {
 
         // constructing the path
         const my_cell_path = construct_path(current_cell, came_from)
+       
 
-        // console.log("My cell path is", my_cell_path)
-
-        // // checking if we have found a path
-        // if (my_cell_path[0] !== end_cell) {
-        //     // console.log("could not find the end cell")       
-        //     time_finished = animate_visited_cells(visited_cells, time_finished)
-        // } else {
-        //     // console.log("end cell found")
-
-        //     time_finished = animate_visited_cells(visited_cells, time_finished)
-        //     time_finished = animate_path_cells(my_cell_path, time_finished)
-            
-        // }
-
-        time_finished = animate_visited_cells(visited_cells, time_finished)
-
-        return [time_finished, my_cell_path[0] === end_cell, my_cell_path]
+        return [my_cell_path[0] === end_cell, my_cell_path, visited_cells]
     }
 
 
@@ -412,8 +426,6 @@ function Grid(props) {
 
             last_time = time_finished + props.animation_speed * k
 
-            console.log("animate_visited_cells", time_finished + props.animation_speed * k)
-
             setTimeout(() => {
                 const neighbor_cell = visited_cells[k]
 
@@ -427,7 +439,6 @@ function Grid(props) {
             
         }
         
-        console.log("last_time at animate_visited_cells", last_time)
         return last_time
     }
 
@@ -456,27 +467,15 @@ function Grid(props) {
 
     const animate_path_cells = (my_cell_path, time_finished) => {
 
-        // let constant_delay = 130
-
-        // if (0 <= props.animation_speed <= 5) {
-        //     constant_delay = 20
-        // } else if (5 < props.animation_speed <= 25) {
-        //     constant_delay = 70
-        // } else if (25 < props.animation_speed <= 35) {
-        //     constant_delay = 100
-        // }
-
-
-
+        let constant_delay = props.animation_speed * 4
+        
         my_cell_path = my_cell_path.reverse()
         // changing cells to path color with a delay
         // const visited_animation_end_time = visited_cell_length * props.animation_speed
         let last_time
-        console.log("time_finished at animate_path_cells", time_finished)
         for (let n=0; n < my_cell_path.length; n++) {
 
-            last_time = time_finished + (50 * n)
-            console.log("animate_path_cells", last_time)
+            last_time = time_finished + (constant_delay * n)
 
             setTimeout(() => {
                 const my_cell = my_cell_path[n]
@@ -485,8 +484,7 @@ function Grid(props) {
 
                 my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = path_class_name
 
-                // path animation speed will remain the same no mater what animation speed given
-                // this is to prevent really slow and really fast path speeds
+                // path animation speed
             }, last_time);
             
         }
