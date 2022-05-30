@@ -247,6 +247,7 @@ function Grid(props) {
 
         let time_finished = 0  
 
+        let bi_directional = false
 
         if (algorithm === "A*") {
             
@@ -271,7 +272,7 @@ function Grid(props) {
             let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
                 
-                const [valid_path, my_cell_path, visited_cells] = Breadth_first_search(curr_start, middle_stops[k])
+                const [valid_path, my_cell_path, visited_cells] = Breadth_First_Search(curr_start, middle_stops[k])
 
                 time_finished += props.animation_speed
 
@@ -284,21 +285,41 @@ function Grid(props) {
                 curr_start = middle_stops[k]
             }
 
+        } else if  (algorithm === "Bi_Directional_Breadth_First_Search") {
+
+            let curr_start = my_start_cell
+            for (let k = 0; k < middle_stops.length; k++) {
+                
+                const [valid_path, my_cell_path, visited_cells] = Bi_Directional_Breadth_First_Search(curr_start, middle_stops[k])
+
+                time_finished += props.animation_speed
+
+                all_visited_cells.push(visited_cells)
+
+                if (valid_path) {
+                    all_valid_paths.push(my_cell_path)
+                }
+
+                curr_start = middle_stops[k]
+            }
+
+            bi_directional = true
+
         }
 
         // animating the visited cells
         for (const visited_cells of all_visited_cells) {
-            time_finished = animate_visited_cells(visited_cells, time_finished) + props.animation_speed
+            time_finished = animate_visited_cells(visited_cells, time_finished, bi_directional) + props.animation_speed
         }
 
-         // animating the path cells
+         // animating the valid path cells
         for (const cell_path of all_valid_paths) {
             time_finished = animate_path_cells(cell_path, time_finished) + props.animation_speed
         }
 
     }
 
-    const Breadth_first_search = (start_cell, end_cell) => {
+    const Breadth_First_Search = (start_cell, end_cell) => {
 
         
         let my_queue = new Queue();
@@ -327,10 +348,71 @@ function Grid(props) {
             }
         }
 
-        // constructing the path
+        // returns a path from end to start
         const my_cell_path = construct_path(current_cell, came_from)
 
-        return [my_cell_path[0] === end_cell, my_cell_path, visited_cells]
+        return [my_cell_path[0] === end_cell, my_cell_path.reverse(), visited_cells]
+    }
+
+
+    const Bi_Directional_Breadth_First_Search = (start_cell, end_cell) => {
+        let start_queue = new Queue();
+        start_queue.enqueue(start_cell)
+
+        let end_queue = new Queue();
+        end_queue.enqueue(end_cell)
+
+        let came_from_start = {}
+        came_from_start[start_cell.my_key] = null
+
+        let came_from_end = {}
+        came_from_end[end_cell.my_key] = null
+
+        const visited_cells = []
+        let my_cell_path_start
+        let my_cell_path_end
+
+        let current_cell_start = null
+        let current_cell_end = null
+        while (!start_queue.isEmpty() || !end_queue.isEmpty()) {
+            current_cell_start = start_queue.dequeue()
+            current_cell_end = end_queue.dequeue()
+
+            if (current_cell_end.my_key in came_from_start) {
+                my_cell_path_start = construct_path(current_cell_end, came_from_start).reverse()
+                my_cell_path_end = construct_path(current_cell_end, came_from_end)
+                break
+            } 
+            else if (current_cell_start.my_key in came_from_end) {
+                my_cell_path_start = construct_path(current_cell_start, came_from_start).reverse()
+                my_cell_path_end = construct_path(current_cell_start, came_from_end)
+                break
+            }
+
+            for (const neighbor_cell_start of generate_neighbor_cells(current_cell_start)) {
+
+                visited_cells.push(neighbor_cell_start)
+
+                for (const neighbor_cell_end of generate_neighbor_cells(current_cell_end)) {
+
+                    visited_cells.push(neighbor_cell_end)
+
+                    if (!(neighbor_cell_end.my_key in came_from_end)) {
+                        end_queue.enqueue(neighbor_cell_end)
+                        came_from_end[neighbor_cell_end.my_key] = current_cell_end
+                    }
+
+                    if (!(neighbor_cell_start.my_key in came_from_start)) {
+                        start_queue.enqueue(neighbor_cell_start)
+                        came_from_start[neighbor_cell_start.my_key] = current_cell_start
+                    }
+                }
+            }
+        }
+
+        const my_cell_path = my_cell_path_start.concat(my_cell_path_end)
+      
+        return [my_cell_path[my_cell_path.length - 1] === end_cell, my_cell_path, visited_cells]
     }
 
     const A_Star_Algorithm = (start_cell, end_cell) => {
@@ -386,11 +468,11 @@ function Grid(props) {
             }
         }
 
-        // constructing the path
+        // returns a path from end to start
         const my_cell_path = construct_path(current_cell, came_from)
        
 
-        return [my_cell_path[0] === end_cell, my_cell_path, visited_cells]
+        return [my_cell_path[0] === end_cell, my_cell_path.reverse(), visited_cells]
     }
 
     const construct_path = (current_cell, came_from) => {
@@ -406,18 +488,25 @@ function Grid(props) {
     }
 
 
-    const animate_visited_cells = (visited_cells, time_finished) => {
+    const animate_visited_cells = (visited_cells, time_finished, bi_directional) => {
         // prevents animating when animation speed is low, cus it looks laggy
         let check_animated = "Visited"
         if (props.animation_speed > 3) {
             check_animated = "Visited_Animated"
         }
 
+
         // changing cells to searched area color with a delay
         let last_time
         for (let k=0; k < visited_cells.length; k++) {
 
-            last_time = time_finished + props.animation_speed * k
+            if (bi_directional) {
+                // if bi_directional, we will lose 80% of delay cus otherwise its too slow
+                last_time = time_finished + Math.floor(props.animation_speed * 0.2) * k
+            } else {
+                last_time = time_finished + props.animation_speed * k
+            }
+            
 
             setTimeout(() => {
                 const neighbor_cell = visited_cells[k]
@@ -427,9 +516,6 @@ function Grid(props) {
 
                     my_grid_ref.current[neighbor_cell.y_val][neighbor_cell.x_val].className = visited_class_name
                 }
-
-                
-
 
                 // animation speed 
             }, last_time);
@@ -466,7 +552,6 @@ function Grid(props) {
 
         let constant_delay = props.animation_speed * 4
         
-        my_cell_path = my_cell_path.reverse()
         // changing cells to path color with a delay
         // const visited_animation_end_time = visited_cell_length * props.animation_speed
         let last_time
@@ -815,8 +900,10 @@ function Grid(props) {
     return (
         <>
             <div className="buttons">
-            <button onClick={() => Start_Search_Algorithm("Breadth_First_Search")}>Breadth First Search</button>
+                <button onClick={() => Start_Search_Algorithm("Bi_Directional_Breadth_First_Search")}>Bi-Directional Breadth First Search</button>
+                <button onClick={() => Start_Search_Algorithm("Breadth_First_Search")}>Breadth First Search</button>
                 <button onClick={() => Start_Search_Algorithm("A*")}>Start A*</button>
+
                 <button onClick={clear_grid}>Clear Grid</button>
                 <button onClick={clear_visited_and_path_cells}>Clear Path</button>
 
