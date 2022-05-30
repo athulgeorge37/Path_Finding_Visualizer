@@ -21,6 +21,13 @@ h1 {
     /* border: 3px solid darkblue; */
 }
 
+.WEIGHTED_cell_type {
+    background-color: rgb(181, 2, 181);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .START_cell_type {
     background-color: green;
     /* border: 3px solid green; */
@@ -60,26 +67,27 @@ h1 {
 
 /* start of slider css */
 
-.slider_div {
+.slider_div, .cell_weight_div {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.slider_properties, .animation_speed_div {
+.slider_properties, .animation_speed_div, .cell_weight_incrementer_properties {
     display: flex;
     justify-content: center;
 }
 
-.slider_incrementers {
+.incrementers {
     margin: 0;
     height: 30px;
     width: 30px;
 }
 
-.animation_speed_display {
+.incrementer_display {
     background-color: lightblue;
-    width: 30px;
+    width: fit-content;
+    padding-inline: 4px;
     height: 30px;
     display: flex;
     align-items: center;
