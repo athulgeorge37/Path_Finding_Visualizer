@@ -45,8 +45,8 @@ button {
 }
 
 .WEIGHTED {
-    background-color: rgb(181, 2, 181);
-    border: 0.5px solid rgb(181, 2, 181);
+    /* background-color: rgb(181, 2, 181);
+    border: 0.5px solid rgb(181, 2, 181); */
     
     display: flex;
     align-items: center;
@@ -87,8 +87,8 @@ button {
 }
 
 .MIDDLE {
-    background-color: yellow;
-    border: 0.5px solid yellow;
+    background-color: rgb(181, 2, 181);
+    border: 0.5px solid rgb(181, 2, 181);
     animation: animate_start_end 0.25s ease-in-out 0s;
 }
 

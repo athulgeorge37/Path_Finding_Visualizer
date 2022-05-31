@@ -22,7 +22,7 @@ h1 {
 }
 
 .WEIGHTED_cell_type {
-    background-color: rgb(181, 2, 181);
+    /* background-color: rgb(181, 2, 181); */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -34,7 +34,7 @@ h1 {
 }
 
 .MIDDLE_cell_type {
-    background-color: yellow;
+    background-color: rgb(181, 2, 181);
     /* border: 3px solid green; */
 }
 

@@ -14,7 +14,6 @@ function App() {
 	});
 
 	const [animation_speed, set_animation_speed] = useState(DELAY_ANIMATION)
-
 	const [cell_weight, set_cell_weight] = useState(DEFAULT_WEIGHTED_VALUE)
 
 
@@ -46,6 +45,18 @@ function App() {
         }
     }
 
+	const calcColor = (min, max, val) => {
+
+		const minHue = 105
+		const maxHue = 15
+
+		const curPercent = (val - min) / (max - min)
+
+		var colString = "hsl(" + ((curPercent * (maxHue - minHue) ) + minHue) + ",100%,50%)"
+
+		return colString;
+	}
+
 	return (
 		<div className="App">
 			<h1>Path Finding Visualizer</h1>
@@ -53,11 +64,15 @@ function App() {
 				{my_cell_type.cell_types.map((cells, index) => {
 
 					if (cells === "WEIGHTED") {
+						const my_new_color = calcColor(0, 50, cell_weight)
 						return (
 							<div
 								key={index}
 								className={toggle_active_style(index)}
 								onClick={() => toggle_active_cell_type(index)}
+
+								style={ {backgroundColor: my_new_color} }
+
 							>{cell_weight}</div>
 						)
 					}
@@ -93,7 +108,10 @@ function App() {
                         min={0} 
                         max={50} 
                         value={cell_weight} 
-                        onChange={(e) => set_cell_weight(parseInt(e.target.value))}
+                        onChange={(e) => {
+							set_cell_weight(parseInt(e.target.value))
+							toggle_active_cell_type(2)
+						}}
 
                         className="slider"
                     />
@@ -133,6 +151,7 @@ function App() {
 				active_cell_type={my_cell_type.active_cell}
 				animation_speed={animation_speed}
 				cell_weight={cell_weight}
+				calcColor={calcColor}
 			/>
 		</div>
 	);

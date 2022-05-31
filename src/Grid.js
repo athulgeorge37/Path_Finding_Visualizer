@@ -92,6 +92,7 @@ function Grid(props) {
         for (const row of my_Grid) {
             for (const my_cell of row) {
                 const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
+                my_grid_ref.current[my_cell.y_val][my_cell.x_val].style = null
                 if (current_classname.includes("START")) {
                     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell START";
                 } else if (current_classname.includes("END")) {
@@ -131,6 +132,11 @@ function Grid(props) {
                 can_be_updated = false
             } else {
                 my_Grid[y][x].weight = props.cell_weight
+
+                const new_color = props.calcColor(0, 50, props.cell_weight)
+                
+                my_grid_ref.current[y][x].style.backgroundColor = new_color
+                my_grid_ref.current[y][x].style.border = "0.5px solid " + new_color
             }
 
         } else if (props.active_cell_type === "MIDDLE") {
@@ -210,26 +216,21 @@ function Grid(props) {
         for (const row of my_Grid) {
             for (const my_cell of row) {
                 const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
-                // if ((current_classname.includes("Path") || current_classname.includes("Visited")) &&
-                //     !(current_classname.includes("START") || current_classname.includes("END"))) {
-
-                //     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell AIR";
-                // }
-                // if (!(current_classname.includes("START") || current_classname.includes("END") || current_classname.includes("WALL"))) {
-
-                //     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell AIR";
-                // }
-
+                
                 if (current_classname.includes("AIR")) {
                     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell AIR";
                 } else if (current_classname.includes("WEIGHTED") && current_classname.includes("Path")) {
+
+                    const old_color = props.calcColor(0, 50, parseInt(my_grid_ref.current[my_cell.y_val][my_cell.x_val].innerText))
+
+                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].style.backgroundColor = old_color
+                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].style.border = "0.5px solid " + old_color
+
                     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell WEIGHTED";
                 }
             }
         }
     }
-
-
 
     const Start_Search_Algorithm = (algorithm) => {
 
@@ -561,15 +562,7 @@ function Grid(props) {
                 // adding each neighbor cell to visited cell to animate them later
                 visited_cells.push(neighbor_cell)
 
-                // const new_cost = cost_so_far[current_cell.my_key]
-                // const new_cost = cost_so_far[current_cell.my_key] + 1
                 const new_cost = cost_so_far[current_cell.my_key] + neighbor_cell.weight
-
-                if (neighbor_cell.weight != 1) {
-                    console.log("new_cost = cost_so_far[current] + neighbor.weight")
-                    console.log( new_cost, "=", cost_so_far[current_cell.my_key], "+", neighbor_cell.weight)
-                }
-                //         f(n) = g(n) + h(n)
                 //   new_cost = cost so far from start to current + cost from current to neighbor
 
                 if ((!(neighbor_cell.my_key in cost_so_far)) || (new_cost < cost_so_far[neighbor_cell.my_key])) {
@@ -680,6 +673,11 @@ function Grid(props) {
 
                 my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = path_class_name
 
+                if (my_cell.cell_state === "WEIGHTED") {
+                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].style.backgroundColor = "rgb(224, 118, 19)"
+                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].style.border = "0.5px solid rgb(224, 118, 19)"
+                }
+                
                 // path animation speed
             }, last_time);
             
