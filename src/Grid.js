@@ -247,7 +247,7 @@ function Grid(props) {
 
         let time_finished = 0  
 
-        let bi_directional = false
+        let slow_visited_animation = false
 
         if (algorithm === "A*") {
             
@@ -267,7 +267,7 @@ function Grid(props) {
                 curr_start = middle_stops[k]
             }
 
-        } else if  (algorithm === "Breadth_First_Search") {
+        } else if (algorithm === "Breadth_First_Search") {
 
             let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
@@ -285,7 +285,9 @@ function Grid(props) {
                 curr_start = middle_stops[k]
             }
 
-        } else if  (algorithm === "Bi_Directional_Breadth_First_Search") {
+            slow_visited_animation = true
+
+        } else if (algorithm === "Bi_Directional_Breadth_First_Search") {
 
             let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
@@ -303,13 +305,32 @@ function Grid(props) {
                 curr_start = middle_stops[k]
             }
 
-            bi_directional = true
+            slow_visited_animation = true
 
+        } else if (algorithm === "Dijkstras_Algorithm") {
+
+            let curr_start = my_start_cell
+            for (let k = 0; k < middle_stops.length; k++) {
+                
+                const [valid_path, my_cell_path, visited_cells] = Dijkstras_Algorithm(curr_start, middle_stops[k])
+
+                time_finished += props.animation_speed
+
+                all_visited_cells.push(visited_cells)
+
+                if (valid_path) {
+                    all_valid_paths.push(my_cell_path)
+                }
+
+                curr_start = middle_stops[k]
+            }
+
+            slow_visited_animation = true
         }
 
         // animating the visited cells
         for (const visited_cells of all_visited_cells) {
-            time_finished = animate_visited_cells(visited_cells, time_finished, bi_directional) + props.animation_speed
+            time_finished = animate_visited_cells(visited_cells, time_finished, slow_visited_animation) + props.animation_speed
         }
 
          // animating the valid path cells
@@ -321,7 +342,6 @@ function Grid(props) {
 
     const Breadth_First_Search = (start_cell, end_cell) => {
 
-        
         let my_queue = new Queue();
         my_queue.enqueue(start_cell)
 
@@ -353,7 +373,6 @@ function Grid(props) {
 
         return [my_cell_path[0] === end_cell, my_cell_path.reverse(), visited_cells]
     }
-
 
     const Bi_Directional_Breadth_First_Search = (start_cell, end_cell) => {
         let start_queue = new Queue();
@@ -413,6 +432,48 @@ function Grid(props) {
         const my_cell_path = my_cell_path_start.concat(my_cell_path_end)
       
         return [my_cell_path[my_cell_path.length - 1] === end_cell, my_cell_path, visited_cells]
+    }
+
+    const Dijkstras_Algorithm = (start_cell, end_cell) => {
+
+        let my_queue = new PriorityQueue();
+        my_queue.enqueue(start_cell, 0)
+
+        let came_from = {}
+        came_from[start_cell.my_key] = null
+
+        let cost_so_far = {} 
+        cost_so_far[start_cell.my_key] = 0
+
+        const visited_cells = []
+
+        let current_cell = null
+        while (!my_queue.isEmpty()) {
+            current_cell = my_queue.dequeue().element
+
+            if (current_cell === end_cell) {
+                // end cell found, breaking out of while loop
+                break
+            }
+
+            for (const neighbor_cell of generate_neighbor_cells(current_cell)) {
+                visited_cells.push(neighbor_cell)
+
+                const new_cost = cost_so_far[current_cell.my_key] + neighbor_cell.weight
+
+                if (!(neighbor_cell.my_key in cost_so_far) || new_cost < cost_so_far[neighbor_cell.my_key]) {
+                    cost_so_far[neighbor_cell.my_key] = new_cost
+                    const priority = new_cost
+                    my_queue.enqueue(neighbor_cell, priority)
+                    came_from[neighbor_cell.my_key] = current_cell
+                }
+            }
+        }
+
+        // returns a path from end to start
+        const my_cell_path = construct_path(current_cell, came_from)
+
+        return [my_cell_path[0] === end_cell, my_cell_path.reverse(), visited_cells]
     }
 
     const A_Star_Algorithm = (start_cell, end_cell) => {
@@ -488,7 +549,7 @@ function Grid(props) {
     }
 
 
-    const animate_visited_cells = (visited_cells, time_finished, bi_directional) => {
+    const animate_visited_cells = (visited_cells, time_finished, slow_visited_animation) => {
         // prevents animating when animation speed is low, cus it looks laggy
         let check_animated = "Visited"
         if (props.animation_speed > 3) {
@@ -500,7 +561,7 @@ function Grid(props) {
         let last_time
         for (let k=0; k < visited_cells.length; k++) {
 
-            if (bi_directional) {
+            if (slow_visited_animation) {
                 // if bi_directional, we will lose 80% of delay cus otherwise its too slow
                 last_time = time_finished + Math.floor(props.animation_speed * 0.2) * k
             } else {
@@ -903,6 +964,7 @@ function Grid(props) {
                 <button onClick={() => Start_Search_Algorithm("Bi_Directional_Breadth_First_Search")}>Bi-Directional Breadth First Search</button>
                 <button onClick={() => Start_Search_Algorithm("Breadth_First_Search")}>Breadth First Search</button>
                 <button onClick={() => Start_Search_Algorithm("A*")}>Start A*</button>
+                <button onClick={() => Start_Search_Algorithm("Dijkstras_Algorithm")}>Dijkstras_Algorithm</button>
 
                 <button onClick={clear_grid}>Clear Grid</button>
                 <button onClick={clear_visited_and_path_cells}>Clear Path</button>
