@@ -359,6 +359,47 @@ function Grid(props) {
 
     }
 
+    const get_neighbor_cost = (prev_cell, current_cell, neighbor_cell) => {
+
+        let prev_direction = get_direction(prev_cell, current_cell)
+        let next_direction = get_direction(current_cell, neighbor_cell)
+
+        if (prev_cell === null) {
+            prev_direction = "R"
+            next_direction = "R"
+        }
+
+        const horizontal_directions = ["L", "R"]
+        const vertical_directions = ["U", "D"]
+
+        if (prev_direction === next_direction) {
+            return neighbor_cell.weight
+        } else if (horizontal_directions.includes(prev_direction) && vertical_directions.includes(next_direction)) {
+            return neighbor_cell.weight + 1
+        } else if (horizontal_directions.includes(next_direction) && vertical_directions.includes(prev_direction)) {
+            return neighbor_cell.weight + 1
+        }
+
+    }
+
+    const get_direction = (current_cell, new_cell) => {
+
+        // direction can be L, R, U, D = left, right up, down respectivley
+        if (current_cell === null) {
+            return "R"
+        }
+
+        if (current_cell.x_val < new_cell.x_val && current_cell.y_val === new_cell.y_val) { 
+            return "L"
+        } else if (current_cell.x_val > new_cell.x_val && current_cell.y_val === new_cell.y_val) { 
+            return "R"
+        } else if (current_cell.x_val === new_cell.x_val && current_cell.y_val < new_cell.y_val) { 
+            return "D"
+        } else if (current_cell.x_val === new_cell.x_val && current_cell.y_val > new_cell.y_val) { 
+            return "U"
+        } 
+    }
+
     const Breadth_First_Search = (start_cell, end_cell) => {
 
         let my_queue = new Queue();
@@ -453,7 +494,7 @@ function Grid(props) {
         return [my_cell_path[my_cell_path.length - 1] === end_cell, my_cell_path, visited_cells]
     }
 
-    const Dijkstras_Algorithm = (start_cell, end_cell) => {
+    const Dijkstras_Algorithm = (start_cell, end_cell) => { 
 
         let my_queue = new PriorityQueue();
         my_queue.enqueue(start_cell, 0)
@@ -478,7 +519,7 @@ function Grid(props) {
             for (const neighbor_cell of generate_neighbor_cells(current_cell)) {
                 visited_cells.push(neighbor_cell)
 
-                const new_cost = cost_so_far[current_cell.my_key] + neighbor_cell.weight
+                const new_cost = cost_so_far[current_cell.my_key] + get_neighbor_cost(came_from[current_cell.my_key], current_cell, neighbor_cell)
 
                 if (!(neighbor_cell.my_key in cost_so_far) || new_cost < cost_so_far[neighbor_cell.my_key]) {
                     cost_so_far[neighbor_cell.my_key] = new_cost
@@ -562,8 +603,10 @@ function Grid(props) {
                 // adding each neighbor cell to visited cell to animate them later
                 visited_cells.push(neighbor_cell)
 
-                const new_cost = cost_so_far[current_cell.my_key] + neighbor_cell.weight
+                // const new_cost = cost_so_far[current_cell.my_key] + neighbor_cell.weight
                 //   new_cost = cost so far from start to current + cost from current to neighbor
+                const new_cost = cost_so_far[current_cell.my_key] + get_neighbor_cost(came_from[current_cell.my_key], current_cell, neighbor_cell)
+                
 
                 if ((!(neighbor_cell.my_key in cost_so_far)) || (new_cost < cost_so_far[neighbor_cell.my_key])) {
                     cost_so_far[neighbor_cell.my_key] = new_cost
@@ -692,14 +735,10 @@ function Grid(props) {
 
         //                       [x, y]
         //                        E       S        W        N
-        // const neighbor_index = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+        const neighbor_index = [[1, 0], [0, 1], [-1, 0], [0, -1]]
         //                         E        W       N       S
-        let neighbor_index = [[1, 0], [-1, 0], [0, -1], [0, 1]]
+        // let neighbor_index = [[1, 0], [-1, 0], [0, -1], [0, 1]]
 
-        if ((current_cell.x_val + current_cell.y_val) % 2 === 0) {
-            neighbor_index.reverse()
-        }
-        // const neighbor_index = [[0, -1], [1, 0], [0, 1], [-1, 0]]
 
         const my_neighbors = []
         for (let i=0; i < neighbor_index.length; i++) {

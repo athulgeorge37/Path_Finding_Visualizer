@@ -3,7 +3,7 @@ import { useState } from "react";
 import Grid from "./Grid";
 
 const DELAY_ANIMATION = 5   // was 10
-const DEFAULT_WEIGHTED_VALUE = 15
+const DEFAULT_WEIGHTED_VALUE = 25
 
 // this is where we will add all the components of the project
 function App() {
@@ -47,6 +47,7 @@ function App() {
 
 	const calcColor = (min, max, val) => {
 
+		// allows us to get temperture like colors
 		const minHue = 105
 		const maxHue = 15
 
