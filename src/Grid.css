@@ -36,6 +36,13 @@ button {
 
     width: 30px;
     height: 30px;
+
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
 }
   
   
@@ -44,13 +51,18 @@ button {
     border: 0.5px solid lightblue;
 }
 
-.WEIGHTED {
-    /* background-color: rgb(181, 2, 181);
-    border: 0.5px solid rgb(181, 2, 181); */
-    
+.WEIGHTED {    
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.WEIGHTED_Animated {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    animation: animate_path 0.5s ease-in-out 0s;
 }
   
 .WALL {

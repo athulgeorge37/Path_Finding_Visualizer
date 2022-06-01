@@ -13,6 +13,16 @@ function App() {
 		cell_types: ["WALL", "AIR", "WEIGHTED", "START", "MIDDLE", "END"]
 	});
 
+	const [search_algorithms, set_search_algorithm] = useState({
+		current_algorithm: "Dijkstras",
+		available_algorithms: ["Dijkstras", "A STAR", "Breadth First Search", "Bi-Directional Breadth First Search", "Greedy Best First Search"]
+	});
+
+	const [maze_algorithms, set_maze_algorithm] = useState({
+		current_maze: "Recursive Division",
+		available_mazes: ["Recursive Division", "Horizontal Skew Recursive Division", "Vertical Skew Recursive Division", "Scattered WALLS", "Scattered WEIGHTS"]
+	});
+
 	const [animation_speed, set_animation_speed] = useState(DELAY_ANIMATION)
 	const [cell_weight, set_cell_weight] = useState(DEFAULT_WEIGHTED_VALUE)
 
@@ -21,13 +31,48 @@ function App() {
 		set_cell_type({...my_cell_type, active_cell: my_cell_type.cell_types[index]});
 	}
 
-	const toggle_active_style = (index) => {
-		if (my_cell_type.cell_types[index] === my_cell_type.active_cell) {
-			return my_cell_type.cell_types[index] + "_cell_type cell_type active"
+	const toggle_active_search_algo = (index) => {
+		set_search_algorithm({...search_algorithms, current_algorithm: search_algorithms.available_algorithms[index]});
+	}
+
+	const toggle_active_maze_algo = (index) => {
+		set_maze_algorithm({...maze_algorithms, current_maze: maze_algorithms.available_mazes[index]});
+	}
+
+	const toggle_active_cell_type_style = (index) => {
+
+		// return my_cell_type.cell_types[index] + "_cell_type cell_type active"
+		const current_cell = my_cell_type.cell_types[index]
+
+		if (current_cell === my_cell_type.active_cell) {
+			return current_cell + "_cell_type cell_type active"
 		} else {
-			return my_cell_type.cell_types[index] + "_cell_type cell_type"
+			return current_cell + "_cell_type cell_type"
 		}
 	}
+
+	const toggle_active_search_algo_style = (index) => {
+
+		const current_algo = search_algorithms.available_algorithms[index]
+
+		if (current_algo === search_algorithms.current_algorithm) {
+			return current_algo + " search_algos active"
+		} else {
+			return current_algo + " search_algos"
+		}
+	}
+
+	const toggle_active_maze_algo_style = (index) => {
+
+		const current_maze = maze_algorithms.available_mazes[index]
+
+		if (current_maze === maze_algorithms.current_maze) {
+			return current_maze + " maze_algos active"
+		} else {
+			return current_maze + " maze_algos"
+		}
+	}
+
 
 	const increment_animation_speed = (new_speed) => {
         if (new_speed < 0 || new_speed > 50) {
@@ -69,7 +114,7 @@ function App() {
 						return (
 							<div
 								key={index}
-								className={toggle_active_style(index)}
+								className={toggle_active_cell_type_style(index)}
 								onClick={() => toggle_active_cell_type(index)}
 
 								style={ {backgroundColor: my_new_color} }
@@ -82,9 +127,35 @@ function App() {
 					return (
 						<div
 							key={index}
-							className={toggle_active_style(index)}
+							className={toggle_active_cell_type_style(index)}
 							onClick={() => toggle_active_cell_type(index)}
 						/>
+					)
+				})}
+			</div>
+
+			<div className="search_algorithms">
+			<h2>Search Algorithms:</h2>
+				{search_algorithms.available_algorithms.map((algo, index) => {
+					return (
+						<div
+							key={index}
+							className={toggle_active_search_algo_style(index)}
+							onClick={() => toggle_active_search_algo(index)}
+						>{algo}</div>
+					)
+				})}
+			</div>
+
+			<div className="maze_algorithms">
+			<h2>Maze Algorithms:</h2>
+				{maze_algorithms.available_mazes.map((maze, index) => {
+					return (
+						<div
+							key={index}
+							className={toggle_active_maze_algo_style(index)}
+							onClick={() => toggle_active_maze_algo(index)}
+						>{maze}</div>
 					)
 				})}
 			</div>
@@ -153,6 +224,8 @@ function App() {
 				animation_speed={animation_speed}
 				cell_weight={cell_weight}
 				calcColor={calcColor}
+				current_algorithm={search_algorithms.current_algorithm}
+				current_maze={maze_algorithms.current_maze}
 			/>
 		</div>
 	);

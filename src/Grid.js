@@ -93,6 +93,7 @@ function Grid(props) {
             for (const my_cell of row) {
                 const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
                 my_grid_ref.current[my_cell.y_val][my_cell.x_val].style = null
+                my_grid_ref.current[my_cell.y_val][my_cell.x_val].innerText = null
                 if (current_classname.includes("START")) {
                     my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell START";
                 } else if (current_classname.includes("END")) {
@@ -132,6 +133,8 @@ function Grid(props) {
                 can_be_updated = false
             } else {
                 my_Grid[y][x].weight = props.cell_weight
+
+                my_grid_ref.current[y][x].innerText = props.cell_weight
 
                 const new_color = props.calcColor(0, 50, props.cell_weight)
                 
@@ -232,7 +235,7 @@ function Grid(props) {
         }
     }
 
-    const Start_Search_Algorithm = (algorithm) => {
+    const Start_Search_Algorithm = () => {
 
         my_grid_ref.current[0][0].scrollIntoView()
         clear_visited_and_path_cells()
@@ -250,7 +253,7 @@ function Grid(props) {
 
         let slow_visited_animation = false
 
-        if (algorithm === "A*") {
+        if ( props.current_algorithm === "A STAR") {
             
             let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
@@ -268,7 +271,7 @@ function Grid(props) {
                 curr_start = middle_stops[k]
             }
 
-        } else if (algorithm === "Breadth_First_Search") {
+        } else if ( props.current_algorithm === "Breadth First Search") {
 
             let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
@@ -288,7 +291,7 @@ function Grid(props) {
 
             slow_visited_animation = true
 
-        } else if (algorithm === "Bi_Directional_Breadth_First_Search") {
+        } else if ( props.current_algorithm === "Bi-Directional Breadth First Search") {
 
             let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
@@ -308,7 +311,7 @@ function Grid(props) {
 
             slow_visited_animation = true
 
-        } else if (algorithm === "Dijkstras_Algorithm") {
+        } else if ( props.current_algorithm === "Dijkstras") {
 
             let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
@@ -327,7 +330,7 @@ function Grid(props) {
             }
 
             slow_visited_animation = true
-        } else if (algorithm === "Greedy_Best_First_Search") {
+        } else if ( props.current_algorithm === "Greedy Best First Search") {
 
             let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
@@ -616,6 +619,9 @@ function Grid(props) {
                     came_from[neighbor_cell.my_key] = current_cell
                 }
             }
+
+            
+            
         }
 
         // returns a path from end to start
@@ -694,6 +700,40 @@ function Grid(props) {
 
                 // animation speed 
             }, props.animation_speed * k);
+        }
+        
+    }
+
+    const animate_weighted_cells = (weighted_cells) => {
+        // prevents animating when animation speed is low, cus it looks laggy
+        let check_animated = "WEIGHTED"
+        if (props.animation_speed > 3) {
+            check_animated = "WEIGHTED_Animated"
+        }
+
+
+        // changing cells to searched area color with a delay
+        for (let k=0; k < weighted_cells.length; k++) {
+            setTimeout(() => {
+                const weighted_cell = weighted_cells[k][0]
+                const new_weight = weighted_cells[k][1]
+                
+                my_Grid[weighted_cell.y_val][weighted_cell.x_val].weight = new_weight
+                my_Grid[weighted_cell.y_val][weighted_cell.x_val].cell_state = "WEIGHTED"
+
+                const new_color = props.calcColor(0, 50, new_weight)
+                
+                my_grid_ref.current[weighted_cell.y_val][weighted_cell.x_val].style.backgroundColor = new_color
+                my_grid_ref.current[weighted_cell.y_val][weighted_cell.x_val].style.border = "0.5px solid " + new_color
+                my_grid_ref.current[weighted_cell.y_val][weighted_cell.x_val].innerText = new_weight
+
+                let weighted_class_name =  weighted_cell.my_key + " Grid_Cell " + check_animated + " " + weighted_cell.cell_state;
+
+                my_grid_ref.current[weighted_cell.y_val][weighted_cell.x_val].className = weighted_class_name
+
+                // animation speed 
+            }, props.animation_speed * k);
+
         }
         
     }
@@ -786,10 +826,41 @@ function Grid(props) {
 
         return rand_num
 
-      }
+    }
 
+    const generateRandom = (min=0, max=50) => {
 
-    const Scattered_Maze = () => {
+        // find diff
+        let difference = max - min;
+    
+        // generate random number 
+        let rand = Math.random();
+    
+        // multiply with difference 
+        rand = Math.floor( rand * difference);
+    
+        // add with min value 
+        rand = rand + min;
+    
+        return rand;
+    }
+
+    const Start_Maze_Algorithm = () => {
+
+        if (props.current_maze === "Recursive Division") {
+            Recursive_Division_Maze("NONE")
+        } else if (props.current_maze === "Horizontal Skew Recursive Division") {
+            Recursive_Division_Maze("H")
+        } else if (props.current_maze === "Vertical Skew Recursive Division") {
+            Recursive_Division_Maze("V")
+        } else if (props.current_maze === "Scattered WALLS") {
+            Scattered_Maze_WALL()
+        } else if (props.current_maze === "Scattered WEIGHTS") {
+            Scattered_Maze_WEIGHTED()
+        }
+    }
+
+    const Scattered_Maze_WALL = () => {
 
         const walls_to_render = []
 
@@ -814,6 +885,34 @@ function Grid(props) {
         // updating the cell state in the grid so that the searching algorithms work
         for (const wall of walls_to_render) {
             my_Grid[wall.y_val][wall.x_val].cell_state = "WALL"
+        }     
+    }
+
+    const Scattered_Maze_WEIGHTED = () => {
+
+        const cells_to_render = []
+
+        for (const row of my_Grid) {
+            for (const cell of row) {
+                // not adding walls at the start or end cells
+                if ((cell.x_val === my_start_cell.x_val && cell.y_val === my_start_cell.y_val) ||
+                    (cell.x_val === my_end_cell.x_val && cell.y_val === my_end_cell.y_val)) {
+                    continue
+                }
+
+                // if random number smaller than 0.33 then it is a wall
+                if (Math.random() < 0.30) {
+                    cells_to_render.push([cell, generateRandom()])
+                }
+            }
+        }
+
+        // animating the walls_to_render with a delay
+        animate_weighted_cells(cells_to_render)
+
+        // updating the cell state in the grid so that the searching algorithms work
+        for (const cell of cells_to_render) {
+            my_Grid[cell.y_val][cell.x_val].cell_state = "WEIGHTED"
         }     
     }
 
@@ -1051,20 +1150,13 @@ function Grid(props) {
     return (
         <>
             <div className="buttons">
-                <button onClick={() => Start_Search_Algorithm("Bi_Directional_Breadth_First_Search")}>Bi-Directional Breadth First Search</button>
-                <button onClick={() => Start_Search_Algorithm("Breadth_First_Search")}>Breadth First Search</button>
-                <button onClick={() => Start_Search_Algorithm("A*")}>A Star</button>
-                <button onClick={() => Start_Search_Algorithm("Dijkstras_Algorithm")}>Dijkstras</button>
-                <button onClick={() => Start_Search_Algorithm("Greedy_Best_First_Search")}>Greedy Best First Search</button>
+                <button onClick={Start_Search_Algorithm}>Visualize {props.current_algorithm}</button>
 
                 <button onClick={clear_grid}>Clear Grid</button>
                 <button onClick={clear_visited_and_path_cells}>Clear Path</button>
 
-                <button onClick={() => Recursive_Division_Maze("NONE")}>Recursive Division</button>
-                <button onClick={() => Recursive_Division_Maze("H")}>Recursive Division Horizontal Skew</button>
-                <button onClick={() => Recursive_Division_Maze("V")}>Recursive Division Vertical Skew</button>
-
-                <button onClick={Scattered_Maze}>Scattered Maze</button>
+                <button onClick={Start_Maze_Algorithm}>Visualize {props.current_maze}</button>
+                
 
             </div>
 
@@ -1113,6 +1205,7 @@ function Grid(props) {
                 })}
             </div>
         </>
+
     );
 }
 

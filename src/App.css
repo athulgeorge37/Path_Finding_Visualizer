@@ -8,6 +8,13 @@ h1 {
 .cell_types {   
     display: flex;
     justify-content: center;
+
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
 }
 
 
@@ -57,11 +64,55 @@ h1 {
     cursor: pointer;
 }
 
-.active {
+.cell_types .active {
     border: 3px solid orange;
 }
 
 /* end of cell type picker css */
+
+
+/* start of search algo picker css */
+
+.search_algorithms, 
+.maze_algorithms {   
+    display: flex;
+    justify-content: center;
+
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+
+.search_algorithms .search_algos,
+.maze_algorithms .maze_algos {
+    width: fit-content;
+    height: 40px;
+    margin: 5px;
+    padding: 5px;
+
+    border-radius: 3px;
+
+    background-color: whitesmoke;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search_algorithms .search_algos:hover,
+.maze_algorithms .maze_algos:hover {
+    background-color: lightblue;
+}
+
+.search_algorithms .active,
+.maze_algorithms .active {
+    background-color: lightblue;
+}
+/* end of search algo picker css */
+
 
 
 
