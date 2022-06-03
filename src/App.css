@@ -100,11 +100,17 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
+    
+    
 }
+
+
 
 .search_algorithms .search_algos:hover,
 .maze_algorithms .maze_algos:hover {
     background-color: lightblue;
+    cursor: pointer;
+
 }
 
 .search_algorithms .active,

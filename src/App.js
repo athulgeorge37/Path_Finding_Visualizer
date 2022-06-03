@@ -83,7 +83,7 @@ function App() {
     }
 
 	const increment_cell_weight = (new_weight) => {
-        if (new_weight < 0) {
+        if (new_weight < 2) {
             return
         } else {
             set_cell_weight(new_weight)
@@ -110,7 +110,7 @@ function App() {
 				{my_cell_type.cell_types.map((cells, index) => {
 
 					if (cells === "WEIGHTED") {
-						const my_new_color = calcColor(0, 50, cell_weight)
+						const my_new_color = calcColor(2, 50, cell_weight)
 						return (
 							<div
 								key={index}
@@ -177,7 +177,7 @@ function App() {
 				<div className="slider_properties">
                     <input 
                         type="range" 
-                        min={0} 
+                        min={2} 
                         max={50} 
                         value={cell_weight} 
                         onChange={(e) => {

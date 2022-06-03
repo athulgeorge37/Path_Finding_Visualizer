@@ -1,5 +1,5 @@
 // import Grid_Cell from "./Grid_Cell"
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import "./Grid.css"
 import { PriorityQueue } from "./priority_queue"
 import { Queue } from "./queue"
@@ -15,6 +15,19 @@ const START_CELL_Y = 10
 
 const END_CELL_X = 32
 const END_CELL_Y = 10
+
+const START_CELL_COLOR = "green"
+const END_CELL_COLOR = "red"
+const MIDDLE_CELL_COLOR = "purple"
+
+const WALL_CELL_COLOR = "darkblue"
+const AIR_CELL_COLOR = "white"
+const AIR_CELL_BORDER_COLOR = "lightblue"
+
+const VISITED_CELL_COLOR = "lightblue"
+const PATH_CELL_COLOR = "rgb(181, 2, 181)"
+
+// weighted cell colors dynamically change
 
 
 let my_start_cell = {
@@ -91,15 +104,16 @@ function Grid(props) {
 
         for (const row of my_Grid) {
             for (const my_cell of row) {
+
                 const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
-                my_grid_ref.current[my_cell.y_val][my_cell.x_val].style = null
                 my_grid_ref.current[my_cell.y_val][my_cell.x_val].innerText = null
+
                 if (current_classname.includes("START")) {
-                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell START";
+                    change_cell_colors(my_cell, START_CELL_COLOR, START_CELL_COLOR)
                 } else if (current_classname.includes("END")) {
-                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell END";
+                    change_cell_colors(my_cell, END_CELL_COLOR, END_CELL_COLOR)
                 } else {
-                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell AIR";
+                    change_cell_colors(my_cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
                 }
 
             }
@@ -109,21 +123,51 @@ function Grid(props) {
         set_my_Grid(initialise_empty_grid)
     }
 
-    const identify_cell_type = (my_key, x, y) => {
+
+    const change_cell_colors = (cell, back_ground_color, border_color, new_class_name=null) => {
+
+        if (new_class_name === null) {
+            my_grid_ref.current[cell.y_val][cell.x_val].className = cell.my_key + " Grid_Cell " + cell.cell_state;
+        } else {
+            my_grid_ref.current[cell.y_val][cell.x_val].className = new_class_name
+        }
+       
+        my_grid_ref.current[cell.y_val][cell.x_val].style.backgroundColor = back_ground_color
+        my_grid_ref.current[cell.y_val][cell.x_val].style.border = "0.5px solid " + border_color
+    }
+
+    const update_cell_type = (my_key, x, y) => {
 
         let new_class_name = my_key + " Grid_Cell "
         const prev_cell_state = my_Grid[y][x].cell_state
         let can_be_updated = true
 
+        // default cell color will be of air cells
+        let new_cell_color = AIR_CELL_COLOR
+        let new_cell_border_color = AIR_CELL_BORDER_COLOR
+
         if (props.active_cell_type === "AIR" || props.active_cell_type === "WALL") {
+
+            if (props.active_cell_type === "WALL") {
+                new_cell_color = WALL_CELL_COLOR
+                new_cell_border_color = WALL_CELL_COLOR
+            } else if (props.active_cell_type === "AIR") {
+                my_grid_ref.current[y][x].innerText = null
+            }
+
             // preventing user from making a start/end cell into a wall/air cell
             if (prev_cell_state === "START" || prev_cell_state === "END") {
                 new_class_name += prev_cell_state
-                can_be_updated = false
+                can_be_updated = false                
+
             } else if (prev_cell_state === "MIDDLE") {
                 middle_stop = null
+
+                new_cell_color = MIDDLE_CELL_COLOR
+                new_cell_border_color = MIDDLE_CELL_COLOR
+                
             } else if (prev_cell_state === "WEIGHTED") {
-                my_Grid[y][x].weight = 1
+                my_Grid[y][x].weight = 1    
             }
         } else if (props.active_cell_type === "WEIGHTED") {
 
@@ -138,8 +182,8 @@ function Grid(props) {
 
                 const new_color = props.calcColor(0, 50, props.cell_weight)
                 
-                my_grid_ref.current[y][x].style.backgroundColor = new_color
-                my_grid_ref.current[y][x].style.border = "0.5px solid " + new_color
+                new_cell_color = new_color
+                new_cell_border_color = new_color
             }
 
         } else if (props.active_cell_type === "MIDDLE") {
@@ -148,53 +192,61 @@ function Grid(props) {
                  // updating cell state of the old middle_stop cell in the grid
                 my_Grid[middle_stop.y_val][middle_stop.x_val].cell_state = "AIR"
 
-                // making the visual grid reflect the old start cell changes by changing the classname
-                my_grid_ref.current[middle_stop.y_val][middle_stop.x_val].className = new_class_name // making it air cell
-            }
+                change_cell_colors(middle_stop, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
+            }   
 
-            // new start cell with appropriate updates
+            // new middle_stop cell
             middle_stop = my_Grid[y][x]
-            
+
+            new_cell_color = MIDDLE_CELL_COLOR
+            new_cell_border_color = MIDDLE_CELL_COLOR
 
         } else if (props.active_cell_type === "START") {
 
             // updating cell state of old start cell in the grid
             my_Grid[my_start_cell.y_val][my_start_cell.x_val].cell_state = "AIR"
 
-            // making the visual grid reflect the old start cell changes by changing the classname
-            my_grid_ref.current[my_start_cell.y_val][my_start_cell.x_val].className = new_class_name // making it air cell
+            change_cell_colors(my_start_cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
 
-            // new start cell with appropriate updates
+            // new start cell
             my_start_cell = my_Grid[y][x]
+
+
+            // updating ccolors
+            new_cell_color = START_CELL_COLOR
+            new_cell_border_color = START_CELL_COLOR
 
         } else if (props.active_cell_type === "END") {
 
             // updating cell state of old start cell in the grid
             my_Grid[my_end_cell.y_val][my_end_cell.x_val].cell_state = "AIR"
 
-            // making the visual grid reflect the old start cell changes by changing the classname
-            my_grid_ref.current[my_end_cell.y_val][my_end_cell.x_val].className = new_class_name // making it air cell
+            change_cell_colors(my_end_cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
 
-            // new start cell with appropriate updates
+            // new end cell
             my_end_cell = my_Grid[y][x]
+
+            new_cell_color = END_CELL_COLOR
+            new_cell_border_color = END_CELL_COLOR
         }
 
         if (can_be_updated) {
             my_Grid[y][x].cell_state = props.active_cell_type
             new_class_name += props.active_cell_type
+
+            change_cell_colors(my_Grid[y][x], new_cell_color, new_cell_border_color, new_class_name)
         }
 
-        return new_class_name
     }
 
     const handle_mouse_click = (x, y, my_key) => {  
-        my_grid_ref.current[y][x].className = identify_cell_type(my_key, x, y)
+        update_cell_type(my_key, x, y)
     }
 
     const handle_mouse_down = (x, y, my_key) => {   
         
         try {
-            my_grid_ref.current[y][x].className = identify_cell_type(my_key, x, y)
+            update_cell_type(my_key, x, y)
             set_mouse_down(true)
         } catch (TypeError) {
             set_mouse_down(false)
@@ -205,8 +257,7 @@ function Grid(props) {
     const handle_mouse_enter = (x, y, my_key) => {
 
         if (mouse_down) {
-            my_Grid[y][x].is_Wall = !my_Grid[y][x].is_Wall
-            my_grid_ref.current[y][x].className = identify_cell_type(my_key, x, y)
+            update_cell_type(my_key, x, y)
         }
     }
 
@@ -221,15 +272,10 @@ function Grid(props) {
                 const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
                 
                 if (current_classname.includes("AIR")) {
-                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell AIR";
+                    change_cell_colors(my_cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
                 } else if (current_classname.includes("WEIGHTED") && current_classname.includes("Path")) {
-
                     const old_color = props.calcColor(0, 50, parseInt(my_grid_ref.current[my_cell.y_val][my_cell.x_val].innerText))
-
-                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].style.backgroundColor = old_color
-                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].style.border = "0.5px solid " + old_color
-
-                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = my_cell.my_key + " Grid_Cell WEIGHTED";
+                    change_cell_colors(my_cell, old_color, old_color)
                 }
             }
         }
@@ -667,10 +713,21 @@ function Grid(props) {
             setTimeout(() => {
                 const neighbor_cell = visited_cells[k]
 
-                if (neighbor_cell.weight === 1) { 
-                    let visited_class_name =  neighbor_cell.my_key + " Grid_Cell " + check_animated + " " + neighbor_cell.cell_state;
+                // only want neirbor cells to affect air cells
+                if (neighbor_cell.weight === 1 && 
+                    !((neighbor_cell.x_val === my_start_cell.x_val && neighbor_cell.y_val === my_start_cell.y_val) ||
+                    (neighbor_cell.x_val === my_end_cell.x_val && neighbor_cell.y_val === my_end_cell.y_val))) { 
+                    
+                    let can_update_cell_color = true
+                    if (middle_stop !== null && (neighbor_cell.x_val === middle_stop.x_val && neighbor_cell.y_val === middle_stop.y_val)) {
+                        can_update_cell_color = false
+                    } 
+                    
+                    if (can_update_cell_color) {
+                        let visited_class_name =  neighbor_cell.my_key + " Grid_Cell " + check_animated + " " + neighbor_cell.cell_state;
+                        change_cell_colors(neighbor_cell, VISITED_CELL_COLOR, VISITED_CELL_COLOR, visited_class_name)
+                    }
 
-                    my_grid_ref.current[neighbor_cell.y_val][neighbor_cell.x_val].className = visited_class_name
                 }
 
                 // animation speed 
@@ -683,6 +740,9 @@ function Grid(props) {
 
 
     const animate_wall_cells = (wall_cells) => {
+
+        // animates and updates the cell state to WALL in the grid, for search algos to work
+
         // prevents animating when animation speed is low, cus it looks laggy
         let check_animated = "WALL"
         if (props.animation_speed > 3) {
@@ -694,9 +754,20 @@ function Grid(props) {
             setTimeout(() => {
                 const wall_cell = wall_cells[k]
 
-                let wall_class_name =  wall_cell.my_key + " Grid_Cell " + check_animated + " " + wall_cell.cell_state;
+                let can_update_cell_color = true
+                if (middle_stop !== null && (wall_cell.x_val === middle_stop.x_val && wall_cell.y_val === middle_stop.y_val)) {
+                    can_update_cell_color = false
+                } 
+                
+                if (can_update_cell_color) {
+                    my_Grid[wall_cell.y_val][wall_cell.x_val].cell_state = "WALL"
 
-                my_grid_ref.current[wall_cell.y_val][wall_cell.x_val].className = wall_class_name
+                    let wall_class_name =  wall_cell.my_key + " Grid_Cell " + check_animated + " WALL";
+
+                    change_cell_colors(wall_cell, WALL_CELL_COLOR, WALL_CELL_COLOR, wall_class_name)
+
+                    my_grid_ref.current[wall_cell.y_val][wall_cell.x_val].innerText = null
+                }
 
                 // animation speed 
             }, props.animation_speed * k);
@@ -705,6 +776,9 @@ function Grid(props) {
     }
 
     const animate_weighted_cells = (weighted_cells) => {
+
+        // animates and updates the cell state to WEIGHTED in the grid, for search algos to work
+
         // prevents animating when animation speed is low, cus it looks laggy
         let check_animated = "WEIGHTED"
         if (props.animation_speed > 3) {
@@ -721,15 +795,10 @@ function Grid(props) {
                 my_Grid[weighted_cell.y_val][weighted_cell.x_val].weight = new_weight
                 my_Grid[weighted_cell.y_val][weighted_cell.x_val].cell_state = "WEIGHTED"
 
-                const new_color = props.calcColor(0, 50, new_weight)
-                
-                my_grid_ref.current[weighted_cell.y_val][weighted_cell.x_val].style.backgroundColor = new_color
-                my_grid_ref.current[weighted_cell.y_val][weighted_cell.x_val].style.border = "0.5px solid " + new_color
+                let weighted_class_name =  weighted_cell.my_key + " Grid_Cell " + check_animated + " WEIGHTED";
                 my_grid_ref.current[weighted_cell.y_val][weighted_cell.x_val].innerText = new_weight
-
-                let weighted_class_name =  weighted_cell.my_key + " Grid_Cell " + check_animated + " " + weighted_cell.cell_state;
-
-                my_grid_ref.current[weighted_cell.y_val][weighted_cell.x_val].className = weighted_class_name
+                const new_color = props.calcColor(0, 50, new_weight)
+                change_cell_colors(weighted_cell, new_color, new_color, weighted_class_name)
 
                 // animation speed 
             }, props.animation_speed * k);
@@ -752,13 +821,21 @@ function Grid(props) {
             setTimeout(() => {
                 const my_cell = my_cell_path[n]
 
-                let path_class_name = my_cell.my_key + " Grid_Cell Path " + my_cell.cell_state;
+                 // only want neirbor cells to affect air cells
+                 if (!((my_cell.x_val === my_start_cell.x_val && my_cell.y_val === my_start_cell.y_val) ||
+                    (my_cell.x_val === my_end_cell.x_val && my_cell.y_val === my_end_cell.y_val))) { 
+                    
+                    let can_update_cell_color = true
+                    if (middle_stop !== null && (my_cell.x_val === middle_stop.x_val && my_cell.y_val === middle_stop.y_val)) {
+                        can_update_cell_color = false
+                    } 
+                    
+                    if (can_update_cell_color) {
+                        let path_class_name = my_cell.my_key + " Grid_Cell Path " + my_cell.cell_state;
 
-                my_grid_ref.current[my_cell.y_val][my_cell.x_val].className = path_class_name
+                        change_cell_colors(my_cell, PATH_CELL_COLOR, PATH_CELL_COLOR, path_class_name)
+                    }
 
-                if (my_cell.cell_state === "WEIGHTED") {
-                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].style.backgroundColor = "rgb(224, 118, 19)"
-                    my_grid_ref.current[my_cell.y_val][my_cell.x_val].style.border = "0.5px solid rgb(224, 118, 19)"
                 }
                 
                 // path animation speed
@@ -828,7 +905,7 @@ function Grid(props) {
 
     }
 
-    const generateRandom = (min=0, max=50) => {
+    const generate_random_num_in_range = (min=0, max=50) => {
 
         // find diff
         let difference = max - min;
@@ -881,17 +958,12 @@ function Grid(props) {
 
         // animating the walls_to_render with a delay
         animate_wall_cells(walls_to_render)
-
-        // updating the cell state in the grid so that the searching algorithms work
-        for (const wall of walls_to_render) {
-            my_Grid[wall.y_val][wall.x_val].cell_state = "WALL"
-        }     
+        // this method will also update the cell state to wall
     }
 
     const Scattered_Maze_WEIGHTED = () => {
 
         const cells_to_render = []
-
         for (const row of my_Grid) {
             for (const cell of row) {
                 // not adding walls at the start or end cells
@@ -902,18 +974,14 @@ function Grid(props) {
 
                 // if random number smaller than 0.33 then it is a wall
                 if (Math.random() < 0.30) {
-                    cells_to_render.push([cell, generateRandom()])
+                    cells_to_render.push([cell, generate_random_num_in_range(2, 50)])
                 }
             }
         }
 
         // animating the walls_to_render with a delay
         animate_weighted_cells(cells_to_render)
-
-        // updating the cell state in the grid so that the searching algorithms work
-        for (const cell of cells_to_render) {
-            my_Grid[cell.y_val][cell.x_val].cell_state = "WEIGHTED"
-        }     
+        // this will also set the cell_state to weighted
     }
 
     const Recursive_Division_Maze = (skew_direction) => {
@@ -922,11 +990,7 @@ function Grid(props) {
         
         // animating the walls_to_render with a delay
         animate_wall_cells(walls_to_render)
-
-        // updating the cell state in the grid so that the searching algorithms work
-        for (const wall of walls_to_render) {
-            my_Grid[wall.y_val][wall.x_val].cell_state = "WALL"
-        }       
+        // will also update the cell state to WALL
 
     }
 

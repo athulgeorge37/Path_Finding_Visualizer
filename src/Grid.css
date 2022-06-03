@@ -32,8 +32,6 @@ button {
 } */
 
 .Grid_Cell {
-    border: 0.5px solid lightblue;
-
     width: 30px;
     height: 30px;
 
@@ -47,7 +45,6 @@ button {
   
   
 .AIR {
-    background-color: white;
     border: 0.5px solid lightblue;
 }
 
@@ -58,37 +55,34 @@ button {
 }
 
 .WEIGHTED_Animated {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
+   
     animation: animate_path 0.5s ease-in-out 0s;
 }
   
 .WALL {
-    background-color: darkblue;
-    border: 0.5px solid darkblue;
+    /* background-color: darkblue;
+    border: 0.5px solid darkblue; */
 }
 
 .WALL_Animated {
-    background-color: darkblue;
+    /* background-color: darkblue; */
     /* border: 1px solid darkblue; */
     animation: animate_path 0.5s ease-in-out 0s;
 }
 
 
 .Visited {
-    background-color: lightblue;
+    /* background-color: lightblue; */
 }
 
 .Visited_Animated {
-    background-color: lightblue;
+    /* background-color: lightblue; */
     animation: animate_visited 1.5s ease-in 0s;
 }
 
 .Path {
-    background-color: rgb(224, 118, 19);
-    border: 0.5px solid rgb(224, 118, 19);
+    /* background-color: rgb(224, 118, 19);
+    border: 0.5px solid rgb(224, 118, 19); */
     animation: animate_path 1s ease-in-out 0s;
 }
 
@@ -99,8 +93,8 @@ button {
 }
 
 .MIDDLE {
-    background-color: rgb(181, 2, 181);
-    border: 0.5px solid rgb(181, 2, 181);
+    /* background-color: rgb(181, 2, 181);
+    border: 0.5px solid rgb(181, 2, 181); */
     animation: animate_start_end 0.25s ease-in-out 0s;
 }
 
