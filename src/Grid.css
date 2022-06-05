@@ -59,10 +59,10 @@ button {
     animation: animate_path 0.5s ease-in-out 0s;
 }
   
-.WALL {
-    /* background-color: darkblue;
-    border: 0.5px solid darkblue; */
-}
+/* .WALL {
+    background-color: darkblue;
+    border: 0.5px solid darkblue;
+} */
 
 .WALL_Animated {
     /* background-color: darkblue; */
@@ -71,9 +71,9 @@ button {
 }
 
 
-.Visited {
-    /* background-color: lightblue; */
-}
+/* .Visited {
+    background-color: lightblue;
+} */
 
 .Visited_Animated {
     /* background-color: lightblue; */
