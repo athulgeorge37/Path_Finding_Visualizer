@@ -1,8 +1,16 @@
-const animate_visited_cells = (visited_cells, time_finished, slow_visited_animation, animation_speed, my_start_cell, my_end_cell, middle_stop, visited_cell_color, change_cell_colors) => {
+const animate_visited_cells = (visited_cells, time_finished, slow_visited_animation, animation_speed, 
+                               my_start_cell, my_end_cell, middle_stop, 
+                               visited_cell_color, change_cell_colors) => {
     // prevents animating when animation speed is low, cus it looks laggy
-    let check_animated = "Visited"
+    // let check_animated = "Visited"
+    let check_animated
     if (animation_speed > 3) {
-        check_animated = "Visited_Animated"
+        if (visited_cell_color.includes("2")) {
+            check_animated = "Visited_Animated_2"
+        } else {
+            check_animated = "Visited_Animated_1"
+        }
+        
     }
 
 
@@ -12,7 +20,7 @@ const animate_visited_cells = (visited_cells, time_finished, slow_visited_animat
 
         if (slow_visited_animation) {
             // if bi_directional, we will lose 80% of delay cus otherwise its too slow
-            last_time = time_finished + Math.floor(animation_speed * 0.2) * k
+            last_time = time_finished + Math.floor(animation_speed * 0.35) * k
         } else {
             last_time = time_finished + animation_speed * k
         }
@@ -34,7 +42,7 @@ const animate_visited_cells = (visited_cells, time_finished, slow_visited_animat
                 if (can_update_cell_color) {
                     let visited_class_name =  neighbor_cell.my_key + " Grid_Cell " + check_animated + " " + neighbor_cell.cell_state;
                     // console.log("neighbor_cell weight", neighbor_cell.weight)
-                    change_cell_colors(neighbor_cell, visited_cell_color, visited_cell_color, visited_class_name)
+                    change_cell_colors(neighbor_cell, visited_cell_color, visited_cell_color, visited_class_name) 
                 }
 
             }

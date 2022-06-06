@@ -1,4 +1,4 @@
-import { PriorityQueue } from "../priority_queue";
+import { PriorityQueue } from "../Queues/priority_queue";
 import generate_neighbor_cells from "./helper_functions/generate_neighbors";
 import manhattan_distance from "./helper_functions/manhattan_distance";
 import construct_path from "./helper_functions/construct_path";

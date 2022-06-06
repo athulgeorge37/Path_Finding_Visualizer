@@ -3,6 +3,50 @@ h1 {
    justify-content: center;
 }
 
+/* start of tooltip */
+.cell_type {
+    position: relative;
+    display: inline-block;
+}
+
+.cell_info {
+    visibility: hidden;
+    width: 90px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+  
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+
+    /* how much above the cell u want the tooltip to be for bottom element */
+    bottom: 140%;  
+    left: 50%;
+    /* Use half of the width (120/2 = 60), to center the tooltip for margin left */
+    margin-left: -50px; 
+  }
+  
+  .cell_type:hover .cell_info {
+    visibility: visible;
+  }
+
+  .cell_type .cell_info::after {
+    content: " ";
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+  }
+
+  /* end of tooltip */
+
+
 /* start of cell type picker css */
 
 .cell_types {   
@@ -16,7 +60,6 @@ h1 {
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
-
 
 .AIR_cell_type {
     background-color: white;
@@ -67,6 +110,10 @@ h1 {
 .cell_types .active {
     border: 3px solid orange;
 }
+
+
+
+
 
 /* end of cell type picker css */
 
@@ -181,3 +228,9 @@ input[type='range']::-webkit-slider-thumb:hover {
 }
 
 /* end of slider css */
+
+.algo_info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

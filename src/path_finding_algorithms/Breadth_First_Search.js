@@ -1,4 +1,4 @@
-import { Queue } from "../queue";
+import { Queue } from "../Queues/queue";
 import generate_neighbor_cells from "./helper_functions/generate_neighbors";
 import construct_path from "./helper_functions/construct_path";
 

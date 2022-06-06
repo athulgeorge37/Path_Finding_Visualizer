@@ -38,8 +38,9 @@ const WALL_CELL_COLOR = "darkblue"
 const AIR_CELL_COLOR = "white"
 const AIR_CELL_BORDER_COLOR = "lightblue"
 
-const VISITED_CELL_COLOR = "lightblue"
-const PATH_CELL_COLOR = "rgb(181, 2, 181)"
+const VISITED_CELL_COLOR_1 = "aqua"
+const VISITED_CELL_COLOR_2 = "#d6296c"
+const PATH_CELL_COLOR = "yellow"  //"rgb(181, 2, 181)"
 
 // weighted cell colors dynamically change
 
@@ -62,6 +63,7 @@ let my_end_cell = {
 
 let middle_stop = null
 
+// initialising the grid, also called when clearing the grid
 const initialise_empty_grid = () => {
 
     // console.log("rendering empty grid")
@@ -107,14 +109,14 @@ const initialise_empty_grid = () => {
 
 function Grid(props) {
 
-    // all grid cell objects are kept in this array
     const [my_Grid, set_my_Grid] = useState(initialise_empty_grid)
     const [mouse_down, set_mouse_down] = useState(false)
+
     const my_grid_ref = useRef([])
 
-    const clear_grid = () => {
 
-        // console.log("clearing grid")
+    // clearing grid
+    const clear_grid = () => {
 
         for (const row of my_Grid) {
             for (const my_cell of row) {
@@ -137,7 +139,23 @@ function Grid(props) {
         set_my_Grid(initialise_empty_grid)
     }
 
+    const clear_visited_and_path_cells = () => {
 
+        for (const row of my_Grid) {
+            for (const my_cell of row) {
+                const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
+                
+                if (current_classname.includes("AIR")) {
+                    change_cell_colors(my_cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
+                } else if (current_classname.includes("WEIGHTED") && current_classname.includes("Path")) {
+                    const old_color = props.calcColor(2, 50, parseInt(my_grid_ref.current[my_cell.y_val][my_cell.x_val].innerText))
+                    change_cell_colors(my_cell, old_color, old_color)
+                }
+            }
+        }
+    }
+
+    // updating cell colors and types
     const change_cell_colors = (cell, back_ground_color, border_color, new_class_name=null) => {
 
         if (new_class_name === null) {
@@ -253,6 +271,7 @@ function Grid(props) {
 
     }
 
+    // handling clicking and click and drag events
     const handle_mouse_click = (x, y, my_key) => {  
         update_cell_type(my_key, x, y)
     }
@@ -279,22 +298,7 @@ function Grid(props) {
         set_mouse_down(false)
     }
 
-
-    const clear_visited_and_path_cells = () => {
-        for (const row of my_Grid) {
-            for (const my_cell of row) {
-                const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
-                
-                if (current_classname.includes("AIR")) {
-                    change_cell_colors(my_cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
-                } else if (current_classname.includes("WEIGHTED") && current_classname.includes("Path")) {
-                    const old_color = props.calcColor(2, 50, parseInt(my_grid_ref.current[my_cell.y_val][my_cell.x_val].innerText))
-                    change_cell_colors(my_cell, old_color, old_color)
-                }
-            }
-        }
-    }
-
+    // starting search and maze algorithms
     const Start_Search_Algorithm = () => {
 
         my_grid_ref.current[0][0].scrollIntoView()
@@ -310,12 +314,12 @@ function Grid(props) {
         const all_visited_cells = []
 
         let time_finished = 0  
-
         let slow_visited_animation = false
 
-        if ( props.current_algorithm === "A STAR") {
+        let curr_start = my_start_cell
+
+        if ( props.current_algorithm === "A STAR" ) {
             
-            let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
                 
                 const [valid_path, my_cell_path, visited_cells] = A_Star_Algorithm(curr_start, middle_stops[k], my_Grid)
@@ -331,9 +335,8 @@ function Grid(props) {
                 curr_start = middle_stops[k]
             }
 
-        } else if ( props.current_algorithm === "Breadth First Search") {
+        } else if ( props.current_algorithm === "Breadth First Search" ) {
 
-            let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
                 
                 const [valid_path, my_cell_path, visited_cells] = Breadth_First_Search(curr_start, middle_stops[k], my_Grid)
@@ -351,9 +354,8 @@ function Grid(props) {
 
             slow_visited_animation = true
 
-        } else if ( props.current_algorithm === "Bi-Directional Breadth First Search") {
+        } else if ( props.current_algorithm === "Bi-Directional Breadth First Search" ) {
 
-            let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
                 
                 const [valid_path, my_cell_path, visited_cells] = Bi_Directional_Breadth_First_Search(curr_start, middle_stops[k], my_Grid)
@@ -371,9 +373,8 @@ function Grid(props) {
 
             slow_visited_animation = true
 
-        } else if ( props.current_algorithm === "Dijkstras") {
+        } else if ( props.current_algorithm === "Dijkstras" ) {
 
-            let curr_start = my_start_cell
             for (let k = 0; k < middle_stops.length; k++) {
                 
                 const [valid_path, my_cell_path, visited_cells] = Dijkstras_Algorithm(curr_start, middle_stops[k], my_Grid)
@@ -390,9 +391,9 @@ function Grid(props) {
             }
 
             slow_visited_animation = true
-        } else if ( props.current_algorithm === "Greedy Best First Search") {
 
-            let curr_start = my_start_cell
+        } else if ( props.current_algorithm === "Greedy Best First Search" ) {
+
             for (let k = 0; k < middle_stops.length; k++) {
                 
                 const [valid_path, my_cell_path, visited_cells] = Greedy_Best_First_Search(curr_start, middle_stops[k], my_Grid)
@@ -411,11 +412,15 @@ function Grid(props) {
 
 
         // animating the visited cells
+        const visited_colors = [VISITED_CELL_COLOR_1, VISITED_CELL_COLOR_2]
+        let n = 0
         for (const visited_cells of all_visited_cells) {
             // time_finished = animate_visited_cells(visited_cells, time_finished, slow_visited_animation) + props.animation_speed
             time_finished = animate_visited_cells(visited_cells, time_finished, slow_visited_animation, props.animation_speed, 
                                                   my_start_cell, my_end_cell, middle_stop, 
-                                                  VISITED_CELL_COLOR, change_cell_colors) + props.animation_speed
+                                                  visited_colors[n], change_cell_colors) + props.animation_speed
+
+            n += 1
         }
 
         // animating the valid path cells
@@ -428,6 +433,9 @@ function Grid(props) {
     }
 
     const Start_Maze_Algorithm = () => {
+
+        my_grid_ref.current[0][0].scrollIntoView()
+        clear_visited_and_path_cells()
 
         if (props.current_maze === "Recursive Division") {
             const walls_to_render = Recursive_Division_Algorithm("NONE", 0, 0, GRID_HEIGHT, GRID_WIDTH, my_start_cell, my_end_cell, my_Grid, null)
@@ -444,7 +452,6 @@ function Grid(props) {
         } else if (props.current_maze === "Scattered WEIGHTS") {
             const cells_to_render = Scattered_Maze_WEIGHTED(my_start_cell, my_end_cell, my_Grid)
             animate_weighted_cells(cells_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, change_cell_colors, props.calcColor)
-            
         }
     }
 
