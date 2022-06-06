@@ -234,3 +234,26 @@ input[type='range']::-webkit-slider-thumb:hover {
     flex-direction: column;
     align-items: center;
 }
+
+
+.page_selection {
+    display: flex;
+    justify-content: center;
+    /* border-bottom: 2px solid black; */
+}
+
+.page_selection .page {
+    margin: 20px 50px;
+    color: gray;
+}
+
+.page_selection .active {
+    color: black;
+    padding-bottom: 5px;
+    border-bottom: 2px solid black;
+}
+
+.page_selection .page:hover {
+    color: black;
+    cursor: pointer;
+}

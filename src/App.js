@@ -1,6 +1,9 @@
 import './App.css';
 import { useState } from "react";
 import Grid from "./Grid";
+import Dijkstras_Info_Page from './Dijkstras_Info_Page';
+import Recursive_Division_info_page from './Recursive_Division_info_page';
+
 
 const DELAY_ANIMATION = 5   // was 10
 const DEFAULT_WEIGHTED_VALUE = 25
@@ -25,6 +28,12 @@ function App() {
 
 	const [animation_speed, set_animation_speed] = useState(DELAY_ANIMATION)
 	const [cell_weight, set_cell_weight] = useState(DEFAULT_WEIGHTED_VALUE)
+
+	const [pages, set_page] = useState({
+		active_page: "search",
+		available_pages: ["search", "maze"]
+	});
+
 
 
 	const toggle_active_cell_type = (index) => {
@@ -72,7 +81,6 @@ function App() {
 			return current_maze + " maze_algos"
 		}
 	}
-
 
 	const increment_animation_speed = (new_speed) => {
         if (new_speed < 0 || new_speed > 50) {
@@ -135,6 +143,35 @@ function App() {
 		}
 	}
 
+	const toggle_active_page = (index) => {
+		set_page({ ...pages, active_page: pages.available_pages[index] });
+	}
+
+	const toggle_active_page_style = (index) => {
+		const current_page = pages.available_pages[index]
+
+		if (current_page === pages.active_page) {
+			return current_page + " page active"
+		} else {
+			return current_page + " page"
+		}
+	}
+
+	const render_appropriate_page = () => {
+		if (pages.active_page === "search") {
+			const check_search_algo = search_algorithms.current_algorithm
+			if (check_search_algo === "Dijkstras") {
+				return <Dijkstras_Info_Page/>
+			}
+		} else {
+			const check_maze_algo = maze_algorithms.current_maze
+			if (check_maze_algo === "Recursive Division") {
+				return <Recursive_Division_info_page/>
+			}
+		}
+	}
+
+
 	return (
 		<div className="App">
 			<h1>Path Finding Visualizer</h1>
@@ -152,7 +189,7 @@ function App() {
 								style={ {backgroundColor: my_new_color} }
 
 							>{cell_weight}
-							<span className="cell_info">{cell}</span></div>
+							<span className="cell_info">WEIGHT</span></div>
 						)
 					}
 
@@ -263,6 +300,28 @@ function App() {
 				current_algorithm={search_algorithms.current_algorithm}
 				current_maze={maze_algorithms.current_maze}
 			/>
+
+
+			<div className="page_selection">
+				{pages.available_pages.map((my_page, index) => {
+					return (
+						<h2
+						key={index}
+						className={toggle_active_page_style(index)}
+						onClick={() => toggle_active_page(index)}
+						>{my_page === "search" ? search_algorithms.current_algorithm : maze_algorithms.current_maze}</h2>
+					)
+				})}				
+			</div>
+			
+
+			<div className="render_page">
+				{render_appropriate_page()}
+			</div>
+
+			
+
+
 		</div>
 	);
 }
