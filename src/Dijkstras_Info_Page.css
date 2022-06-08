@@ -2,6 +2,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 100px;
 }
 
+.Dijkstras_info_page .headings {
+    display: flex;
+}
+
+.Dijkstras_info_page p {
+    width: 840px;
+    margin: 10px 0;
+}
 

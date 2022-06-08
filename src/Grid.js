@@ -38,7 +38,7 @@ const WALL_CELL_COLOR = "darkblue"
 const AIR_CELL_COLOR = "white"
 const AIR_CELL_BORDER_COLOR = "lightblue"
 
-const VISITED_CELL_COLOR_1 = "aqua"
+const VISITED_CELL_COLOR_1 = "#3e8bfa"
 const VISITED_CELL_COLOR_2 = "#d6296c"
 const PATH_CELL_COLOR = "yellow"  //"rgb(181, 2, 181)"
 

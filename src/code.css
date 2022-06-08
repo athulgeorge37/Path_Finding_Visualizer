@@ -2,7 +2,8 @@
     background-color: #2a2b2b;
     padding: 20px;
     border-radius: 0.5em;
-    margin-bottom: 100px;
+    width: 800px;
+    margin: 5px 0;
 }
 
 code {
@@ -15,7 +16,6 @@ code {
 
 .keyword {
     color: red;
-    
 }
 
 .class-name {

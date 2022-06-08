@@ -155,14 +155,15 @@ h1 {
 
 .search_algorithms .search_algos:hover,
 .maze_algorithms .maze_algos:hover {
-    background-color: lightblue;
+    background-color: #3e8bfa;
     cursor: pointer;
 
 }
 
 .search_algorithms .active,
 .maze_algorithms .active {
-    background-color: lightblue;
+    background-color: #3e8bfa;
+    /* #154084 */
 }
 /* end of search algo picker css */
 

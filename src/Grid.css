@@ -57,11 +57,11 @@ button {
 
 .WEIGHTED_Animated {
    
-    animation: animate_path 0.5s ease-in-out 0s;
+    animation: animate_weights 0.5s ease-in-out 0s;
 }
 
 .WALL_Animated {
-    animation: animate_path 0.5s ease-in-out 0s;
+    animation: animate_walls 0.5s ease-in-out 0s;
 }
 
 
@@ -74,7 +74,7 @@ button {
 }
 
 .Path {
-    animation: animate_path 1s ease-in-out 0s;
+    animation: animate_path 1.5s ease-in-out 0s;
 }
 
 .START {
@@ -96,8 +96,17 @@ button {
 
 @keyframes animate_start_end {
 
+    /* 0% {
+        transform: scale(0.3);
+    }
+
+    60% {
+        transform: scale(1.2);
+    } */
+
     0% {
         transform: scale(0.3);
+        border-radius: 50%;
     }
 
     60% {
@@ -108,7 +117,7 @@ button {
 
 @keyframes animate_visited_1 {
 
-    0% {
+    /* 0% {
         transform: scale(0.4);
         background-color: rgba(17, 104, 217, 0.75);
     }
@@ -121,6 +130,18 @@ button {
 
     75% {
         background-color: rgba(0, 190, 218, 0.75);
+    } */
+
+    0% {
+        transform: scale(0.4);
+        background-color: purple;
+        border-radius: 50%;
+    }
+
+
+    50% {
+        transform: scale(1.1);
+        background-color: aqua;
     }
 
     
@@ -129,7 +150,7 @@ button {
 
 @keyframes animate_visited_2 {
 
-    0% {
+    /* 0% {
         transform: scale(0.4);
         background-color: rgba(97, 0, 20, 0.75);
     }
@@ -142,14 +163,51 @@ button {
 
     75% {
         background-color: rgba(178, 67, 255, 0.75);
-    }
+    } */
     
+
+    0% {
+        transform: scale(0.4);
+        background-color: rgba(97, 0, 20, 0.75);
+        border-radius: 50%;
+    }
+
+
+    50% {
+        transform: scale(1.1);
+        background-color: darkmagenta;
+    }
 }
 
 @keyframes animate_path {
 
     0% {
         transform: scale(0.4);
+        background-color: orange;
+        border-radius: 50%;
+    }
+    
+}
+
+@keyframes animate_walls {
+
+    0% {
+        transform: scale(0.4);
+        border-radius: 50%;
+        background-color: yellow;
+    }
+
+    20% {
+        background-color: darkblue;
+    }
+    
+}
+
+@keyframes animate_weights {
+
+    0% {
+        transform: scale(0.4);
+        border-radius: 50%;
     }
     
 }
