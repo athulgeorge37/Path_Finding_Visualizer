@@ -1,13 +1,17 @@
 .Code {
-    background-color: #2a2b2b;
     padding: 20px;
     border-radius: 0.5em;
-    width: 800px;
+    /* width: 800px; */
+    width: 55vw;
     margin: 5px 0;
 }
 
 code {
     color: white;
+}
+
+pre, code, .token, .Code {
+    background-color: #2a2b2b;
 }
 
 .comment {

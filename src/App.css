@@ -63,35 +63,29 @@ h1 {
 
 .AIR_cell_type {
     background-color: white;
-    /* border: 3px solid lightblue; */
 }
 
 .WALL_cell_type {
-    background-color: darkblue;
-    /* border: 3px solid darkblue; */
+    background-color: var(--WALL_color);
 }
 
 .WEIGHTED_cell_type {
-    /* background-color: rgb(181, 2, 181); */
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .START_cell_type {
-    background-color: green;
-    /* border: 3px solid green; */
+    background-color: var(--START_color);
 }
 
 .MIDDLE_cell_type {
-    background-color: rgb(181, 2, 181);
-    /* border: 3px solid green; */
+    background-color: var(--MIDDLE_color);
 }
 
 
 .END_cell_type {
-    background-color: red;
-    /* border: 3px solid red; */
+    background-color: var(--END_color);
 }
 
 .cell_type {
@@ -99,7 +93,7 @@ h1 {
     width: 30px;
     height: 30px;
     border-radius: 15%;
-    border: 3px solid lightblue;
+    border: 3px solid var(--AIR_border_color);
 }
 
 .cell_type:hover {
@@ -143,7 +137,7 @@ h1 {
 
     border-radius: 3px;
 
-    background-color: whitesmoke;
+    /* background-color: whitesmoke; */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -155,14 +149,14 @@ h1 {
 
 .search_algorithms .search_algos:hover,
 .maze_algorithms .maze_algos:hover {
-    background-color: #3e8bfa;
+    background-color: var(--PRIMARY_color);
     cursor: pointer;
 
 }
 
 .search_algorithms .active,
 .maze_algorithms .active {
-    background-color: #3e8bfa;
+    background-color: var(--PRIMARY_color);
     /* #154084 */
 }
 /* end of search algo picker css */
@@ -190,7 +184,7 @@ h1 {
 }
 
 .incrementer_display {
-    background-color: lightblue;
+    background-color: var(--PRIMARY_color);
     width: fit-content;
     padding-inline: 4px;
     height: 30px;

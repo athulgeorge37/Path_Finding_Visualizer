@@ -1,11 +1,11 @@
 const animate_visited_cells = (visited_cells, time_finished, slow_visited_animation, animation_speed, 
                                my_start_cell, my_end_cell, middle_stop, 
-                               visited_cell_color, change_cell_colors) => {
+                               visited_cell_color, visited_animation_type, change_cell_colors) => {
     // prevents animating when animation speed is low, cus it looks laggy
     // let check_animated = "Visited"
     let check_animated
     if (animation_speed > 3) {
-        if (visited_cell_color.includes("2")) {
+        if (visited_animation_type === "2") {
             check_animated = "Visited_Animated_2"
         } else {
             check_animated = "Visited_Animated_1"

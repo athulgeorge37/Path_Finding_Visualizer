@@ -106,7 +106,7 @@ function App() {
 
 		const curPercent = (val - min) / (max - min)
 
-		var colString = "hsl(" + ((curPercent * (maxHue - minHue) ) + minHue) + ",100%,50%)"
+		var colString = "hsl(" + ((curPercent * (maxHue - minHue) ) + minHue) + ", 85%, 50%)"
 
 		return colString;
 	}
@@ -205,7 +205,7 @@ function App() {
 			</div>
 
 			<div className="search_algorithms">
-			<h2>Search Algorithms:</h2>
+			<h2>Algorithms:</h2>
 				{search_algorithms.available_algorithms.map((algo, index) => {
 					return (
 						<div
@@ -219,7 +219,7 @@ function App() {
 			<div className='algo_info'>{determine_algorithm_info(search_algorithms.current_algorithm)}</div>
 
 			<div className="maze_algorithms">
-			<h2>Maze Algorithms:</h2>
+			<h2>Mazes:</h2>
 				{maze_algorithms.available_mazes.map((maze, index) => {
 					return (
 						<div

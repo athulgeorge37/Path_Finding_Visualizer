@@ -30,17 +30,17 @@ const START_CELL_Y = 10
 const END_CELL_X = 32
 const END_CELL_Y = 10
 
-const START_CELL_COLOR = "green"
-const END_CELL_COLOR = "red"
+const START_CELL_COLOR = "#04633F"
+const END_CELL_COLOR = "#880537"
 const MIDDLE_CELL_COLOR = "purple"
 
-const WALL_CELL_COLOR = "darkblue"
-const AIR_CELL_COLOR = "white"
+const WALL_CELL_COLOR = "#001b53"
+const AIR_CELL_COLOR = "whitesmoke"
 const AIR_CELL_BORDER_COLOR = "lightblue"
 
-const VISITED_CELL_COLOR_1 = "#3e8bfa"
+const VISITED_CELL_COLOR_1 = "#29D693"
 const VISITED_CELL_COLOR_2 = "#d6296c"
-const PATH_CELL_COLOR = "yellow"  //"rgb(181, 2, 181)"
+const PATH_CELL_COLOR = "#D0E51A"
 
 // weighted cell colors dynamically change
 
@@ -216,6 +216,8 @@ function Grid(props) {
                 
                 new_cell_color = new_color
                 new_cell_border_color = new_color
+                // new_cell_border_color = WALL_CELL_COLOR
+                
             }
 
         } else if (props.active_cell_type === "MIDDLE") {
@@ -413,12 +415,14 @@ function Grid(props) {
 
         // animating the visited cells
         const visited_colors = [VISITED_CELL_COLOR_1, VISITED_CELL_COLOR_2]
+        const visited_animation_type = ["1", "2"]
+
         let n = 0
         for (const visited_cells of all_visited_cells) {
             // time_finished = animate_visited_cells(visited_cells, time_finished, slow_visited_animation) + props.animation_speed
             time_finished = animate_visited_cells(visited_cells, time_finished, slow_visited_animation, props.animation_speed, 
                                                   my_start_cell, my_end_cell, middle_stop, 
-                                                  visited_colors[n], change_cell_colors) + props.animation_speed
+                                                  visited_colors[n], visited_animation_type[n], change_cell_colors) + props.animation_speed
 
             n += 1
         }

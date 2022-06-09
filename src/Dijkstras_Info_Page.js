@@ -28,7 +28,7 @@ const Dijkstras_Algorithm_code = `const Dijkstras_Algorithm = (start_cell, end_c
             break
         }
 
-        // generate_neighbor_cells will return an array of cells adjact to the current_cell
+        // generate_neighbor_cells will return an array of cells adjacent to the current_cell
         for (const neighbor_cell of generate_neighbor_cells(current_cell, my_Grid)) {
 
             visited_cells.push(neighbor_cell)
@@ -40,6 +40,7 @@ const Dijkstras_Algorithm_code = `const Dijkstras_Algorithm = (start_cell, end_c
             // only adding the neighbor_cell to the dictionary if its not in the dictionary or
             // the cost is smaller than the exisiting cost for the neighbor_cell
             if (!(neighbor_cell.my_key in cost_so_far) || new_cost < cost_so_far[neighbor_cell.my_key]) {
+
                 cost_so_far[neighbor_cell.my_key] = new_cost  // adding the new cost to the cost_so_far dictionary
 
                 const priority = new_cost
@@ -68,6 +69,38 @@ const my_cell_code = `let my_cell = {
     weight: 1
 }`;
 
+const generate_neighbors_code = `const generate_neighbor_cells = (current_cell, my_Grid) => {
+    // generates all valid neighbor cells of a particular cell
+
+    //                        E       S        W        N
+    const neighbor_index = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+    //                      [x, y]
+
+
+    const my_neighbors = []
+
+    for (let n=0; n < neighbor_index.length; n++) {
+
+        try {
+            const new_x_coordinate = current_cell.x_val + neighbor_index[n][0]
+            const new_y_coordinate = current_cell.y_val + neighbor_index[n][1]
+
+            const new_neighbor = my_Grid[new_y_coordinate][new_x_coordinate]
+
+            // only adding to array if new neighbor is not a wall cell
+            if (new_neighbor.cell_state !== "WALL") {
+                my_neighbors.push(new_neighbor)
+            }
+            
+        } catch (TypeError) {
+            // avoiding index errors incase we run into the edges of the grid
+            continue
+        }
+    }
+
+    return my_neighbors
+}`;
+
 const priority_queue_code = `let my_queue = new PriorityQueue();
 
 my_queue.enqueue("A", 7)
@@ -81,8 +114,59 @@ console.log("removed element =", my_queue.dequeue().element)
 
 const priority_queue_output = `>>> removed element = P`;
 
-const came_from_code = `let came_from = {}              // eg: { (10, 10): null, (10, 11): (10, 10), (10, 12): (10, 11), etc }
+const came_from_code = `let came_from = {}                     // eg: { (10, 10): null, (10, 11): (10, 10), (10, 12): (10, 11), etc }
 came_from[start_cell.my_key] = null   // we initialise the start cell's parent to null`;
+
+const cost_so_far_code = `let cost_so_far = {}                 // eg: { (10, 10): 0, (10, 11): 1, (10, 12): 2, (10, 13): 3, etc }
+cost_so_far[start_cell.my_key] = 0  // we initialise the start cell's cost to 0`;
+
+const get_neighbor_cost_code = `const get_direction = (old_cell, new_cell) => {
+    // direction can be L, R, U, D = left, right up, down respectivley
+
+    // accounting for when old_cell === start_cell's parent which is null
+    if (old_cell === null) {
+        return "R"
+    }
+
+    if (old_cell.x_val < new_cell.x_val && old_cell.y_val === new_cell.y_val) { 
+        return "L"
+    } else if (old_cell.x_val > new_cell.x_val && old_cell.y_val === new_cell.y_val) { 
+        return "R"
+    } else if (old_cell.x_val === new_cell.x_val && old_cell.y_val < new_cell.y_val) { 
+        return "D"
+    } else if (old_cell.x_val === new_cell.x_val && old_cell.y_val > new_cell.y_val) { 
+        return "U"
+    } 
+
+}
+
+
+const get_neighbor_cost = (prev_cell, current_cell, neighbor_cell) => {
+
+    let prev_direction = get_direction(prev_cell, current_cell)
+    let next_direction = get_direction(current_cell, neighbor_cell)
+
+    // accounting for when we use the start cell
+    if (prev_cell === null) {
+        prev_direction = "R"
+        next_direction = "R"
+    }
+
+    const horizontal_directions = ["L", "R"]
+    const vertical_directions = ["U", "D"]
+
+    // when directions are the same, there is no need to add another point
+    if (prev_direction === next_direction) {
+        return neighbor_cell.weight
+    }
+    // when directions are different, we add and extra point to the existing weight 
+    else if (
+        ( horizontal_directions.includes(prev_direction) && vertical_directions.includes(next_direction) ) ||
+        ( horizontal_directions.includes(next_direction) && vertical_directions.includes(prev_direction) )  ) {
+        return neighbor_cell.weight + 1
+    } 
+
+}`;
 
 function Dijkstras_Info_Page() {
   return (
@@ -110,6 +194,18 @@ function Dijkstras_Info_Page() {
         <Code code={my_cell_code} language="javascript" />
 
         <p>
+            In order to generate neighbor cells, we must know how the grid is structured. Essentially it is just a 2D array of
+            cells just like the one above. Due to the way html works, the grid is rendered top down, which means my_Grid[0] is 
+            the topmost row and my_Grid[0][0] is the top left corner. I am explaining this to avoid confusion when indexing in 
+            any particular direction. This means that if we want to index the cell (15, 12) where x = 15 and y = 12, then 
+            we do my_Grid[12][15]. So lets say we want the neighbor cells of the cell (15, 12), we will try all 4 directions 
+            whose coordinate only differs by 1 in either x or y. Once we have the new coordinates, we only add it to a list 
+            of neighbor cells if it is not a wall.
+        </p>
+        
+        <Code code={generate_neighbors_code} language="javascript" />
+
+        <p>
             Due to the presence of weighted cells, we must prioritize which neighbor cells of the current cell we visit.
             In order to do this we are going to utilise a priority queue data structure, which is essentialy a normal queue, but every 
             time we dequeue an element, we are removing the element with the lowest priority value. An example can be seen below.
@@ -134,9 +230,23 @@ function Dijkstras_Info_Page() {
         <Code code={came_from_code} language="javascript" />
 
         <p>
-            hell
+            Even if we know where each new cell came from, how do we know which is the shortest path with the lowest overall cost?
+            To do this we need to know what the cost is between the start cell and any given cell. We can use another javascript
+            object to track what the cost is so far. So every time we find a potential neighbor cell of the current cell, the new
+            cost is equal to the previous cost of the current cell plus the cost of moving from the current cell to the neighbor cell.
         </p>
 
+        <Code code={cost_so_far_code} language="javascript" />
+
+        <p>
+            So how do we calculate movement costs between the current cell and the neighbor cell? Normally the movement cost 
+            will just be the cost of the neighbor cell itself. However this results in jagged paths because just moving forwards
+            is weighted equally as changing directions. But we want straight paths so we are going to add an extra cost of 1 point to 
+            the existing weight when we change directions. In order for us to know if we are changing directions we must know the 
+            established direction and the new direction between the current cell and the neighbor cell.
+        </p>
+
+        <Code code={get_neighbor_cost_code} language="javascript" />
 
 
         <Code code={Dijkstras_Algorithm_code} language="javascript" />

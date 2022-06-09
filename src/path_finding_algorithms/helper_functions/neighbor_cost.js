@@ -32,11 +32,23 @@ const get_neighbor_cost = (prev_cell, current_cell, neighbor_cell) => {
 
     if (prev_direction === next_direction) {
         return neighbor_cell.weight
-    } else if (horizontal_directions.includes(prev_direction) && vertical_directions.includes(next_direction)) {
+    } else if (
+        (horizontal_directions.includes(prev_direction) && vertical_directions.includes(next_direction)) ||
+        (horizontal_directions.includes(next_direction) && vertical_directions.includes(prev_direction))  ) {
         return neighbor_cell.weight + 1
-    } else if (horizontal_directions.includes(next_direction) && vertical_directions.includes(prev_direction)) {
-        return neighbor_cell.weight + 1
-    }
+    } 
+    
+    // else if (
+    //     (horizontal_directions.includes(prev_direction) || horizontal_directions.includes(next_direction)) &&
+    //     (vertical_directions.includes(prev_direction) || vertical_directions.includes(next_direction)) ) {
+    //     return neighbor_cell.weight + 1
+    // }
+    
+    // else if (horizontal_directions.includes(prev_direction) && vertical_directions.includes(next_direction)) {
+    //     return neighbor_cell.weight + 1
+    // } else if (horizontal_directions.includes(next_direction) && vertical_directions.includes(prev_direction)) {
+    //     return neighbor_cell.weight + 1
+    // }
 
 }
 

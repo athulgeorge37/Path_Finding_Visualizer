@@ -10,7 +10,8 @@
 }
 
 .Dijkstras_info_page p {
-    width: 840px;
+    /* width: 840px; */
+    width: calc(55vw + (20px * 2));
     margin: 10px 0;
 }
 

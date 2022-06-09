@@ -22,15 +22,6 @@ button {
 }
 
 
-/* .Grid_Cell {
-    margin: 1px;
-    border: 1px solid lightblue;
-
-    width: 30px;
-    height: 30px;
-    border-radius: 15%;
-} */
-
 .Grid_Cell {
     width: 30px;
     height: 30px;
@@ -45,7 +36,8 @@ button {
   
   
 .AIR {
-    border: 0.5px solid lightblue;
+    border: 0.5px solid var(--AIR_border_color);
+    background-color: var(--AIR_color);
 }
 
 
@@ -78,8 +70,8 @@ button {
 }
 
 .START {
-    background-color: green;
-    border: 0.5px solid green;
+    background-color: var(--START_color);
+    border: 0.5px solid var(--START_color);
     animation: animate_start_end 0.25s ease-in-out 0s;
 }
 
@@ -88,8 +80,8 @@ button {
 }
 
 .END {
-    background-color: red;
-    border: 0.5px solid red;
+    background-color: var(--END_color);
+    border: 0.5px solid var(--END_color);
     animation: animate_start_end 0.25s ease-in-out 0s;
 }
 
@@ -117,58 +109,30 @@ button {
 
 @keyframes animate_visited_1 {
 
-    /* 0% {
-        transform: scale(0.4);
-        background-color: rgba(17, 104, 217, 0.75);
-    }
-
-
-    50% {
-        transform: scale(1.1);
-        background-color: rgba(0, 217, 159, 0.75);
-    }
-
-    75% {
-        background-color: rgba(0, 190, 218, 0.75);
-    } */
-
     0% {
         transform: scale(0.4);
-        background-color: purple;
+        background-color: #00614D;
         border-radius: 50%;
     }
 
 
     50% {
         transform: scale(1.1);
-        background-color: aqua;
+        background-color: #008B00;
     }
 
+    100% {
+        background-color: var(--VISITED_color_1);
+    }
     
     
 }
 
-@keyframes animate_visited_2 {
-
-    /* 0% {
-        transform: scale(0.4);
-        background-color: rgba(97, 0, 20, 0.75);
-    }
-
-
-    50% {
-        transform: scale(1.1);
-        background-color: rgba(216, 5, 141, 0.75);
-    }
-
-    75% {
-        background-color: rgba(178, 67, 255, 0.75);
-    } */
-    
+@keyframes animate_visited_2 {   
 
     0% {
         transform: scale(0.4);
-        background-color: rgba(97, 0, 20, 0.75);
+        background-color: #610014bf;
         border-radius: 50%;
     }
 
@@ -177,14 +141,27 @@ button {
         transform: scale(1.1);
         background-color: darkmagenta;
     }
+
+    100% {
+        background-color: var(--VISITED_color_2);
+    }
 }
 
 @keyframes animate_path {
 
-    0% {
+
+    /* 50% {
         transform: scale(0.4);
-        background-color: orange;
         border-radius: 50%;
+    } */
+
+    0% {
+        transform: scale(0.3);
+        border-radius: 50%;
+    }
+
+    50% {
+        transform: scale(1.1);
     }
     
 }
@@ -194,11 +171,6 @@ button {
     0% {
         transform: scale(0.4);
         border-radius: 50%;
-        background-color: yellow;
-    }
-
-    20% {
-        background-color: darkblue;
     }
     
 }

@@ -1,4 +1,29 @@
 * {
   margin: 0;
   padding: 0;
+
+  background-color: whitesmoke;
+
+  /* add font here */
+}
+
+:root {
+
+  --PRIMARY_color: #0B8BBE;
+
+  --START_color: #04633F;
+  --END_color: #880537;
+  --MIDDLE_color: purple;
+
+  --AIR_color: whitesmoke;
+  --AIR_border_color: lightblue;
+
+  --WALL_color: #001b53;
+
+  --VISITED_color_1: #29D693;
+  --VISITED_color_2: #d6296c;
+
+  --PATH_color: #D0E51A;
+  
+
 }

@@ -23,7 +23,7 @@ const generate_neighbor_cells = (current_cell, my_Grid) => {
             
         }
         catch (TypeError) {
-            // incase we run into the edges of the grid, we can avoid index errors
+            // avoiding index erros incase we run into the edges of the grid
             continue
         }
     }
