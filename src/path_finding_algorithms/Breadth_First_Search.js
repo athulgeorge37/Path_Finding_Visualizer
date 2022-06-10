@@ -50,6 +50,7 @@ export const Bi_Directional_Breadth_First_Search = (start_cell, end_cell, my_Gri
     came_from_end[end_cell.my_key] = null
 
     const visited_cells = []
+
     let my_cell_path_start
     let my_cell_path_end
 

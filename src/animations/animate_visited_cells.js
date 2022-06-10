@@ -24,7 +24,6 @@ const animate_visited_cells = (visited_cells, time_finished, slow_visited_animat
         } else {
             last_time = time_finished + animation_speed * k
         }
-        
 
         setTimeout(() => {
             const neighbor_cell = visited_cells[k]

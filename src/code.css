@@ -23,7 +23,8 @@ pre, code, .token, .Code {
 }
 
 .class-name {
-    color: rgb(162, 14, 162);
+    /* color: rgb(162, 14, 162); */
+    color: #b6a1ff;
 }
 
 .function {

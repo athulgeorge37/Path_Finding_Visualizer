@@ -40,7 +40,8 @@ const AIR_CELL_BORDER_COLOR = "lightblue"
 
 const VISITED_CELL_COLOR_1 = "#29D693"
 const VISITED_CELL_COLOR_2 = "#d6296c"
-const PATH_CELL_COLOR = "#D0E51A"
+// const PATH_CELL_COLOR = "#D0E51A"
+const PATH_CELL_COLOR = "#0B8BBE"
 
 // weighted cell colors dynamically change
 
@@ -116,6 +117,38 @@ function Grid(props) {
 
 
     // clearing grid
+    const reset_grid = () => {
+
+        for (const row of my_Grid) {
+            for (const my_cell of row) {
+                my_grid_ref.current[my_cell.y_val][my_cell.x_val].innerText = null
+
+                my_Grid[my_cell.y_val][my_cell.x_val].cell_state = "AIR"
+                my_Grid[my_cell.y_val][my_cell.x_val].weight = 1
+                change_cell_colors(my_cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
+            }
+        }
+
+        my_start_cell = {
+            x_val: START_CELL_X,
+            y_val: START_CELL_Y,
+            my_key: "(" + START_CELL_X.toString() + ", " + START_CELL_Y.toString() + ")",
+            cell_state: "START"
+        }
+        change_cell_colors(my_start_cell, START_CELL_COLOR, START_CELL_COLOR)
+
+        my_end_cell = {
+            x_val: END_CELL_X,
+            y_val: END_CELL_Y,
+            my_key: "(" + END_CELL_X.toString() + ", " + END_CELL_Y.toString() + ")",
+            cell_state: "END"
+        }
+        change_cell_colors(my_end_cell, END_CELL_COLOR, END_CELL_COLOR)
+        
+        middle_stop = null
+        set_my_Grid(initialise_empty_grid)
+    }
+
     const clear_grid = () => {
 
         for (const row of my_Grid) {
@@ -128,15 +161,16 @@ function Grid(props) {
                     change_cell_colors(my_cell, START_CELL_COLOR, START_CELL_COLOR)
                 } else if (current_classname.includes("END")) {
                     change_cell_colors(my_cell, END_CELL_COLOR, END_CELL_COLOR)
+                } else if (current_classname.includes("MIDDLE")) {
+                    change_cell_colors(my_cell, MIDDLE_CELL_COLOR, MIDDLE_CELL_COLOR)
                 } else {
                     change_cell_colors(my_cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
+                    my_Grid[my_cell.y_val][my_cell.x_val].cell_state = "AIR"
+                    my_Grid[my_cell.y_val][my_cell.x_val].weight = 1
                 }
 
             }
         }
-        
-        middle_stop = null
-        set_my_Grid(initialise_empty_grid)
     }
 
     const clear_visited_and_path_cells = () => {
@@ -150,6 +184,35 @@ function Grid(props) {
                 } else if (current_classname.includes("WEIGHTED") && current_classname.includes("Path")) {
                     const old_color = props.calcColor(2, 50, parseInt(my_grid_ref.current[my_cell.y_val][my_cell.x_val].innerText))
                     change_cell_colors(my_cell, old_color, old_color)
+                }
+            }
+        }
+    }
+
+    const clear_wall_cells = () => {
+
+        for (const row of my_Grid) {
+            for (const my_cell of row) {
+                const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
+                if (current_classname.includes("WALL")) {
+                    change_cell_colors(my_cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
+                    my_Grid[my_cell.y_val][my_cell.x_val].cell_state = "AIR"
+                    my_Grid[my_cell.y_val][my_cell.x_val].weight = 1
+                }
+            }
+        }
+    }
+
+    const clear_weighted_cells = () => {
+
+        for (const row of my_Grid) {
+            for (const my_cell of row) {
+                const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
+                my_grid_ref.current[my_cell.y_val][my_cell.x_val].innerText = null
+                if (current_classname.includes("WEIGHTED")) {
+                    change_cell_colors(my_cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
+                    my_Grid[my_cell.y_val][my_cell.x_val].cell_state = "AIR"
+                    my_Grid[my_cell.y_val][my_cell.x_val].weight = 1
                 }
             }
         }
@@ -303,7 +366,7 @@ function Grid(props) {
     // starting search and maze algorithms
     const Start_Search_Algorithm = () => {
 
-        my_grid_ref.current[0][0].scrollIntoView()
+        // my_grid_ref.current[0][0].scrollIntoView()
         clear_visited_and_path_cells()
 
         const middle_stops = []
@@ -320,112 +383,56 @@ function Grid(props) {
 
         let curr_start = my_start_cell
 
-        if ( props.current_algorithm === "A STAR" ) {
-            
-            for (let k = 0; k < middle_stops.length; k++) {
+        let valid_path = false
+        let my_cell_path = []
+        let visited_cells = []
+        for (let k = 0; k < middle_stops.length; k++) {
                 
-                const [valid_path, my_cell_path, visited_cells] = A_Star_Algorithm(curr_start, middle_stops[k], my_Grid)
-
-                time_finished += props.animation_speed
-
-                all_visited_cells.push(visited_cells)
-
-                if (valid_path) {
-                    all_valid_paths.push(my_cell_path)
-                }
-
-                curr_start = middle_stops[k]
+            if ( props.current_algorithm === "A STAR" ) {
+                [valid_path, my_cell_path, visited_cells] = A_Star_Algorithm(curr_start, middle_stops[k], my_Grid)
+            } else if ( props.current_algorithm === "Breadth First Search" ) {
+                [valid_path, my_cell_path, visited_cells] = Breadth_First_Search(curr_start, middle_stops[k], my_Grid)
+                slow_visited_animation = true
+            } else if ( props.current_algorithm === "Bi-Directional Breadth First Search" ) {
+                [valid_path, my_cell_path, visited_cells] = Bi_Directional_Breadth_First_Search(curr_start, middle_stops[k], my_Grid)
+                slow_visited_animation = true
+            } else if ( props.current_algorithm === "Dijkstras" ) {
+                [valid_path, my_cell_path, visited_cells] = Dijkstras_Algorithm(curr_start, middle_stops[k], my_Grid)
+                slow_visited_animation = true
+            } else if ( props.current_algorithm === "Greedy Best First Search" ) {
+                [valid_path, my_cell_path, visited_cells] = Greedy_Best_First_Search(curr_start, middle_stops[k], my_Grid)
             }
 
-        } else if ( props.current_algorithm === "Breadth First Search" ) {
 
-            for (let k = 0; k < middle_stops.length; k++) {
-                
-                const [valid_path, my_cell_path, visited_cells] = Breadth_First_Search(curr_start, middle_stops[k], my_Grid)
+            time_finished += props.animation_speed
 
-                time_finished += props.animation_speed
+            all_visited_cells.push(visited_cells)
 
-                all_visited_cells.push(visited_cells)
-
-                if (valid_path) {
-                    all_valid_paths.push(my_cell_path)
-                }
-
-                curr_start = middle_stops[k]
+            if (valid_path) {
+                all_valid_paths.push(my_cell_path)
             }
 
-            slow_visited_animation = true
-
-        } else if ( props.current_algorithm === "Bi-Directional Breadth First Search" ) {
-
-            for (let k = 0; k < middle_stops.length; k++) {
-                
-                const [valid_path, my_cell_path, visited_cells] = Bi_Directional_Breadth_First_Search(curr_start, middle_stops[k], my_Grid)
-
-                time_finished += props.animation_speed
-
-                all_visited_cells.push(visited_cells)
-
-                if (valid_path) {
-                    all_valid_paths.push(my_cell_path)
-                }
-
-                curr_start = middle_stops[k]
-            }
-
-            slow_visited_animation = true
-
-        } else if ( props.current_algorithm === "Dijkstras" ) {
-
-            for (let k = 0; k < middle_stops.length; k++) {
-                
-                const [valid_path, my_cell_path, visited_cells] = Dijkstras_Algorithm(curr_start, middle_stops[k], my_Grid)
-
-                time_finished += props.animation_speed
-
-                all_visited_cells.push(visited_cells)
-
-                if (valid_path) {
-                    all_valid_paths.push(my_cell_path)
-                }
-
-                curr_start = middle_stops[k]
-            }
-
-            slow_visited_animation = true
-
-        } else if ( props.current_algorithm === "Greedy Best First Search" ) {
-
-            for (let k = 0; k < middle_stops.length; k++) {
-                
-                const [valid_path, my_cell_path, visited_cells] = Greedy_Best_First_Search(curr_start, middle_stops[k], my_Grid)
-
-                time_finished += props.animation_speed
-
-                all_visited_cells.push(visited_cells)
-
-                if (valid_path) {
-                    all_valid_paths.push(my_cell_path)
-                }
-
-                curr_start = middle_stops[k]
-            }
+            curr_start = middle_stops[k]
         }
 
 
         // animating the visited cells
+        
+
+        // maybe slow_visited_animation can instead be a value between 0 and 1 which multiples animation speed to adjust animation based on algo
         const visited_colors = [VISITED_CELL_COLOR_1, VISITED_CELL_COLOR_2]
         const visited_animation_type = ["1", "2"]
 
         let n = 0
         for (const visited_cells of all_visited_cells) {
-            // time_finished = animate_visited_cells(visited_cells, time_finished, slow_visited_animation) + props.animation_speed
             time_finished = animate_visited_cells(visited_cells, time_finished, slow_visited_animation, props.animation_speed, 
-                                                  my_start_cell, my_end_cell, middle_stop, 
-                                                  visited_colors[n], visited_animation_type[n], change_cell_colors) + props.animation_speed
+                                                my_start_cell, my_end_cell, middle_stop, 
+                                                visited_colors[n], visited_animation_type[n], change_cell_colors) + props.animation_speed
 
             n += 1
         }
+    
+        
 
         // animating the valid path cells
         for (const cell_path of all_valid_paths) {
@@ -438,16 +445,19 @@ function Grid(props) {
 
     const Start_Maze_Algorithm = () => {
 
-        my_grid_ref.current[0][0].scrollIntoView()
+        // my_grid_ref.current[0][0].scrollIntoView()
         clear_visited_and_path_cells()
 
         if (props.current_maze === "Recursive Division") {
+            clear_wall_cells()
             const walls_to_render = Recursive_Division_Algorithm("NONE", 0, 0, GRID_HEIGHT, GRID_WIDTH, my_start_cell, my_end_cell, my_Grid, null)
             animate_wall_cells(walls_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, WALL_CELL_COLOR, change_cell_colors)
         } else if (props.current_maze === "Horizontal Skew Recursive Division") {
+            clear_wall_cells()
             const walls_to_render = Recursive_Division_Algorithm("H", 0, 0, GRID_HEIGHT, GRID_WIDTH, my_start_cell, my_end_cell, my_Grid, null)
             animate_wall_cells(walls_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, WALL_CELL_COLOR, change_cell_colors)
         } else if (props.current_maze === "Vertical Skew Recursive Division") {
+            clear_wall_cells()
             const walls_to_render = Recursive_Division_Algorithm("V", 0, 0, GRID_HEIGHT, GRID_WIDTH, my_start_cell, my_end_cell, my_Grid, null)
             animate_wall_cells(walls_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, WALL_CELL_COLOR, change_cell_colors)
         } else if (props.current_maze === "Scattered WALLS") {
@@ -465,8 +475,13 @@ function Grid(props) {
             <div className="buttons">
                 <button onClick={Start_Search_Algorithm}>Visualize {props.current_algorithm}</button>
 
+                <button onClick={reset_grid}>Reset Grid</button>
                 <button onClick={clear_grid}>Clear Grid</button>
                 <button onClick={clear_visited_and_path_cells}>Clear Path</button>
+                <button onClick={clear_wall_cells}>Clear WALLS</button>
+                <button onClick={clear_weighted_cells}>Clear WEIGHTS</button>
+
+                
 
                 <button onClick={Start_Maze_Algorithm}>Visualize {props.current_maze}</button>
                 

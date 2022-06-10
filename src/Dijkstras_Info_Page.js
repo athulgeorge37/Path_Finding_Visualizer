@@ -243,10 +243,15 @@ function Dijkstras_Info_Page() {
             will just be the cost of the neighbor cell itself. However this results in jagged paths because just moving forwards
             is weighted equally as changing directions. But we want straight paths so we are going to add an extra cost of 1 point to 
             the existing weight when we change directions. In order for us to know if we are changing directions we must know the 
-            established direction and the new direction between the current cell and the neighbor cell.
+            established direction between the previous cell and the current cell. And the new direction between the current cell 
+            and the neighbor cell.
         </p>
 
         <Code code={get_neighbor_cost_code} language="javascript" />
+
+        <p>
+            The actual algorithm
+        </p>
 
 
         <Code code={Dijkstras_Algorithm_code} language="javascript" />
