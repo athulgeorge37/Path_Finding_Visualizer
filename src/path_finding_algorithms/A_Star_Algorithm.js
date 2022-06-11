@@ -45,8 +45,6 @@ const A_Star_Algorithm = (start_cell, end_cell, my_Grid) => {
             if ((!(neighbor_cell.my_key in cost_so_far)) || (new_cost < cost_so_far[neighbor_cell.my_key])) {
                 cost_so_far[neighbor_cell.my_key] = new_cost
                 const priority = new_cost + manhattan_distance(neighbor_cell, end_cell)
-                // neighbor_cell.priority = priority
-                neighbor_cell.priority = priority
                 my_queue.enqueue(neighbor_cell, priority)
                 came_from[neighbor_cell.my_key] = current_cell
             }

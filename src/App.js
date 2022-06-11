@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Grid from "./Grid";
 import Dijkstras_Info_Page from './Dijkstras_Info_Page';
 import Recursive_Division_info_page from './Recursive_Division_info_page';
@@ -26,6 +26,11 @@ function App() {
 		available_mazes: ["Recursive Division", "Horizontal Skew Recursive Division", "Vertical Skew Recursive Division", "Scattered WALLS", "Scattered WEIGHTS"]
 	});
 
+	const [clear_options, set_clear_options] = useState({
+		current_clear_option: "Clear GRID",
+		available_clear_options: ["Clear GRID", "Clear PATH", "Clear WALLS", "Clear WEIGHTS", "RESET GRID"]
+	});
+
 	const [animation_speed, set_animation_speed] = useState(DELAY_ANIMATION)
 	const [cell_weight, set_cell_weight] = useState(DEFAULT_WEIGHTED_VALUE)
 
@@ -33,6 +38,29 @@ function App() {
 		active_page: "search",
 		available_pages: ["search", "maze"]
 	});
+
+	const [algo_drop_down_open, set_algo_drop_down_open] = useState(false);
+	const [maze_drop_down_open, set_maze_drop_down_open] = useState(false);
+	const [clear_drop_down_open, set_clear_drop_down_open] = useState(false);
+
+	useEffect(() => {
+
+		const close_drop_down = (e) => {
+
+			if (e.path[0].tagName !== "BUTTON") {
+				set_algo_drop_down_open(false)
+				set_maze_drop_down_open(false)
+				set_clear_drop_down_open(false)
+			}
+			
+		}
+
+		document.body.addEventListener("click", close_drop_down)
+
+		return () => {
+			document.body.removeEventListener("click", close_drop_down)
+		}
+	}, []);
 
 
 
@@ -48,6 +76,10 @@ function App() {
 		set_maze_algorithm({...maze_algorithms, current_maze: maze_algorithms.available_mazes[index]});
 	}
 
+	const toggle_active_clear_option = (index) => {
+		set_clear_options({...clear_options, current_clear_option: clear_options.available_clear_options[index]});
+	}
+
 	const toggle_active_cell_type_style = (index) => {
 
 		// return my_cell_type.cell_types[index] + "_cell_type cell_type active"
@@ -60,6 +92,7 @@ function App() {
 		}
 	}
 
+	// prob dont need the toggle active styles
 	const toggle_active_search_algo_style = (index) => {
 
 		const current_algo = search_algorithms.available_algorithms[index]
@@ -174,122 +207,195 @@ function App() {
 
 	return (
 		<div className="App">
-			<h1>Path Finding Visualizer</h1>
-			<div className="cell_types">
-				{my_cell_type.cell_types.map((cell, index) => {
+			<div className="all_options">
 
-					if (cell === "WEIGHTED") {
-						const my_new_color = calcColor(2, 50, cell_weight)
+				<div className="heading_and_animation_slider">
+					<h1>Path Finding Visualizer</h1>
+					<div className="animation_slider_div">
+					<div>Animation Delay:</div>
+					<div className="animation_speed_div">
+						<button 
+							onClick={() => increment_animation_speed(animation_speed - 1)}
+							className="incrementers"
+						>-</button>
+						<div className="incrementer_display">{animation_speed} ms</div>
+						<button 
+							onClick={() => increment_animation_speed(animation_speed + 1)}
+							className="incrementers"
+						>+</button>
+					</div>
+
+					<div className="slider_properties">
+						<input 
+							type="range" 
+							min={0} 
+							max={50} 
+							value={animation_speed} 
+							onChange={(e) => set_animation_speed(parseInt(e.target.value))}
+
+							className="slider"
+						/>
+					</div>
+
+					</div>
+
+				</div>
+
+				<div className="all_drop_downs">
+					<div className="search_drop_down drop_down_div">
+						<p>Algorithms:</p>
+						<button
+						className='search_button btn'
+						onClick={() => set_algo_drop_down_open(!algo_drop_down_open)}
+						>{search_algorithms.current_algorithm} V</button>
+						<div className={"drop_down " + (algo_drop_down_open ? "open" : "closed")}>
+							{search_algorithms.available_algorithms.map((algo, index) => {
+									return (
+										<div
+											key={index}
+											className={"drop_down_item " + (algo === search_algorithms.current_algorithm ? "active" : "")}
+											onClick={() => toggle_active_search_algo(index)}
+										>{algo}</div>
+									)
+								})}
+						</div>
+					</div>
+					
+					<div className="maze_drop_down drop_down_div">
+						<p>Mazes:</p>
+						<button
+						className='maze_button btn'
+						onClick={() => set_maze_drop_down_open(!maze_drop_down_open)}
+						>{maze_algorithms.current_maze} V</button>
+						<div className={"drop_down " + (maze_drop_down_open ? "open" : "closed")}>
+							{maze_algorithms.available_mazes.map((maze, index) => {
+									return (
+										<div
+											key={index}
+											className={"drop_down_item " + (maze === maze_algorithms.current_maze ? "active" : "")}
+											onClick={() => toggle_active_maze_algo(index)}
+										>{maze}</div>
+									)
+								})}
+						</div>
+					</div>
+
+					<div className="clear_drop_down drop_down_div">
+						<p>Clear:</p>
+						<button
+						className='clear_button btn'
+						onClick={() => set_clear_drop_down_open(!clear_drop_down_open)}
+						>{clear_options.current_clear_option} V</button>
+						<div className={"drop_down " + (clear_drop_down_open ? "open" : "closed")}>
+							{clear_options.available_clear_options.map((clear, index) => {
+									return (
+										<div
+											key={index}
+											className={"drop_down_item " + (clear === clear_options.current_clear_option ? "active" : "")}
+											onClick={() => toggle_active_clear_option(index)}
+										>{clear}</div>
+									)
+								})}
+						</div>
+					</div>
+
+				</div>
+
+				
+				<div className="cell_types_and_weighted_slider">
+					<div className="cell_types">
+						{my_cell_type.cell_types.map((cell, index) => {
+
+							if (cell === "WEIGHTED") {
+								const my_new_color = calcColor(2, 50, cell_weight)
+								return (
+									<div
+										key={index}
+										className={toggle_active_cell_type_style(index)}
+										onClick={() => toggle_active_cell_type(index)}
+
+										style={ {backgroundColor: my_new_color} }
+
+									>{cell_weight}
+									<span className={"cell_info " + (cell === my_cell_type.active_cell ? "cell_info_active" : "")}>WEIGHT</span></div>
+								)
+							}
+
+
+							return (
+								<div
+									key={index}
+									className={toggle_active_cell_type_style(index)}
+									onClick={() => toggle_active_cell_type(index)}
+								><span className={"cell_info " + (cell === my_cell_type.active_cell ? "cell_info_active" : "")}>{cell}</span></div>
+							)
+						})}
+					</div>
+					<div className="cell_weight_div">
+						<div>Cell Weight:</div>
+						<div className="cell_weight_incrementer_properties">
+							<button 
+								onClick={() => increment_cell_weight(cell_weight - 1)}
+								className="incrementers"
+							>-</button>
+							{/* <div className="incrementer_display">{cell_weight}</div> */}
+							<button 
+								onClick={() => increment_cell_weight(cell_weight + 1)}
+								className="incrementers"
+							>+</button>
+						</div>
+
+						<div className="slider_properties">
+							<input 
+								type="range" 
+								min={2} 
+								max={50} 
+								value={cell_weight} 
+								onChange={(e) => {
+									set_cell_weight(parseInt(e.target.value))
+									toggle_active_cell_type(2)
+								}}
+
+								className="slider"
+							/>
+						</div>
+
+					</div>
+				</div>
+
+				{/* <div className="search_algorithms">
+				<h2>Algorithms:</h2>
+					{search_algorithms.available_algorithms.map((algo, index) => {
 						return (
 							<div
 								key={index}
-								className={toggle_active_cell_type_style(index)}
-								onClick={() => toggle_active_cell_type(index)}
-
-								style={ {backgroundColor: my_new_color} }
-
-							>{cell_weight}
-							<span className="cell_info">WEIGHT</span></div>
+								className={toggle_active_search_algo_style(index)}
+								onClick={() => toggle_active_search_algo(index)}
+							>{algo}</div>
 						)
-					}
-
-
-					return (
-						<div
-							key={index}
-							className={toggle_active_cell_type_style(index)}
-							onClick={() => toggle_active_cell_type(index)}
-						><span className="cell_info">{cell}</span></div>
-					)
-				})}
-			</div>
-
-			<div className="search_algorithms">
-			<h2>Algorithms:</h2>
-				{search_algorithms.available_algorithms.map((algo, index) => {
-					return (
-						<div
-							key={index}
-							className={toggle_active_search_algo_style(index)}
-							onClick={() => toggle_active_search_algo(index)}
-						>{algo}</div>
-					)
-				})}
-			</div>
-			<div className='algo_info'>{determine_algorithm_info(search_algorithms.current_algorithm)}</div>
-
-			<div className="maze_algorithms">
-			<h2>Mazes:</h2>
-				{maze_algorithms.available_mazes.map((maze, index) => {
-					return (
-						<div
-							key={index}
-							className={toggle_active_maze_algo_style(index)}
-							onClick={() => toggle_active_maze_algo(index)}
-						>{maze}</div>
-					)
-				})}
-			</div>
-			<div className='algo_info'>{determine_maze_info(maze_algorithms.current_maze)}</div>
-
-			<div className="cell_weight_div">
-				<div>Cell Weight:</div>
-				<div className="cell_weight_incrementer_properties">
-					<button 
-						onClick={() => increment_cell_weight(cell_weight - 1)}
-						className="incrementers"
-					>-</button>
-					{/* <div className="incrementer_display">{cell_weight}</div> */}
-					<button 
-						onClick={() => increment_cell_weight(cell_weight + 1)}
-						className="incrementers"
-					>+</button>
+					})}
 				</div>
+				<div className='algo_info'>{determine_algorithm_info(search_algorithms.current_algorithm)}</div>
 
-				<div className="slider_properties">
-                    <input 
-                        type="range" 
-                        min={2} 
-                        max={50} 
-                        value={cell_weight} 
-                        onChange={(e) => {
-							set_cell_weight(parseInt(e.target.value))
-							toggle_active_cell_type(2)
-						}}
+				<div className="maze_algorithms">
+				<h2>Mazes:</h2>
+					{maze_algorithms.available_mazes.map((maze, index) => {
+						return (
+							<div
+								key={index}
+								className={toggle_active_maze_algo_style(index)}
+								onClick={() => toggle_active_maze_algo(index)}
+							>{maze}</div>
+						)
+					})}
+				</div>
+				<div className='algo_info'>{determine_maze_info(maze_algorithms.current_maze)}</div> */}
 
-                        className="slider"
-                    />
-                </div>
-
+				
+				
 			</div>
 
-			<div className="slider_div">
-                <div>Animation Delay:</div>
-                <div className="animation_speed_div">
-                    <button 
-                        onClick={() => increment_animation_speed(animation_speed - 1)}
-                        className="incrementers"
-                    >-</button>
-                    <div className="incrementer_display">{animation_speed} ms</div>
-                    <button 
-                        onClick={() => increment_animation_speed(animation_speed + 1)}
-                        className="incrementers"
-                    >+</button>
-                </div>
-
-                <div className="slider_properties">
-                    <input 
-                        type="range" 
-                        min={0} 
-                        max={50} 
-                        value={animation_speed} 
-                        onChange={(e) => set_animation_speed(parseInt(e.target.value))}
-
-                        className="slider"
-                    />
-                </div>
-
-            </div>
+			
 
 
 			<Grid 
@@ -299,6 +405,7 @@ function App() {
 				calcColor={calcColor}
 				current_algorithm={search_algorithms.current_algorithm}
 				current_maze={maze_algorithms.current_maze}
+				current_clear_option={clear_options.current_clear_option}
 			/>
 
 

@@ -21,6 +21,9 @@ import animate_path_cells from './animations/animate_path_cells';
 // maze works better when dimensions of grid are odd
 const GRID_HEIGHT = 21  // y
 const GRID_WIDTH = 45  // x
+
+// const GRID_HEIGHT = 43  // y
+// const GRID_WIDTH = 91  // x
 // make it so that grid size depends on user's screen size
 
 // these are the default start and end values when page initially reloads
@@ -40,7 +43,6 @@ const AIR_CELL_BORDER_COLOR = "lightblue"
 
 const VISITED_CELL_COLOR_1 = "#29D693"
 const VISITED_CELL_COLOR_2 = "#d6296c"
-// const PATH_CELL_COLOR = "#D0E51A"
 const PATH_CELL_COLOR = "#0B8BBE"
 
 // weighted cell colors dynamically change
@@ -50,7 +52,6 @@ let my_start_cell = {
     x_val: START_CELL_X,
     y_val: START_CELL_Y,
     my_key: "(" + START_CELL_X.toString() + ", " + START_CELL_Y.toString() + ")",
-    priority: Infinity,
     cell_state: "START"
 }
 
@@ -58,7 +59,6 @@ let my_end_cell = {
     x_val: END_CELL_X,
     y_val: END_CELL_Y,
     my_key: "(" + END_CELL_X.toString() + ", " + END_CELL_Y.toString() + ")",
-    priority: Infinity,
     cell_state: "END"
 }
 
@@ -87,7 +87,6 @@ const initialise_empty_grid = () => {
                 x_val: x,
                 y_val: y,
                 my_key: "(" + x.toString() + ", " + y.toString() + ")",
-                priority: Infinity,
                 cell_state: my_cell_state,
                 weight: 1
             }
@@ -195,9 +194,9 @@ function Grid(props) {
             for (const my_cell of row) {
                 const current_classname =  my_grid_ref.current[my_cell.y_val][my_cell.x_val].className
                 if (current_classname.includes("WALL")) {
-                    change_cell_colors(my_cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
                     my_Grid[my_cell.y_val][my_cell.x_val].cell_state = "AIR"
                     my_Grid[my_cell.y_val][my_cell.x_val].weight = 1
+                    change_cell_colors(my_cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
                 }
             }
         }
@@ -363,7 +362,7 @@ function Grid(props) {
         set_mouse_down(false)
     }
 
-    // starting search and maze algorithms
+    // starting search, maze, clear algorithms
     const Start_Search_Algorithm = () => {
 
         // my_grid_ref.current[0][0].scrollIntoView()
@@ -469,22 +468,36 @@ function Grid(props) {
         }
     }
 
+    const Start_Clear_Grid_Option = () => {
+
+        if (props.current_clear_option === "Clear GRID") {
+            clear_grid()
+        } else if (props.current_clear_option === "Clear PATH") {
+            clear_visited_and_path_cells()
+        } else if (props.current_clear_option === "Clear WALLS") {
+            clear_wall_cells()
+        } else if (props.current_clear_option === "Clear WEIGHTS") {
+            clear_weighted_cells()
+        } else if (props.current_clear_option === "RESET GRID") {
+            reset_grid()
+        }
+    }
+
 
     return (
         <>
             <div className="buttons">
                 <button onClick={Start_Search_Algorithm}>Visualize {props.current_algorithm}</button>
 
-                <button onClick={reset_grid}>Reset Grid</button>
+                <button onClick={Start_Maze_Algorithm}>Visualize {props.current_maze}</button>
+
+                <button onClick={Start_Clear_Grid_Option}>{props.current_clear_option}</button>
+                
+                 {/* <button onClick={reset_grid}>Reset Grid</button>
                 <button onClick={clear_grid}>Clear Grid</button>
                 <button onClick={clear_visited_and_path_cells}>Clear Path</button>
                 <button onClick={clear_wall_cells}>Clear WALLS</button>
-                <button onClick={clear_weighted_cells}>Clear WEIGHTS</button>
-
-                
-
-                <button onClick={Start_Maze_Algorithm}>Visualize {props.current_maze}</button>
-                
+                <button onClick={clear_weighted_cells}>Clear WEIGHTS</button> */}
 
             </div>
 

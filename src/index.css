@@ -1,15 +1,7 @@
-* {
-  margin: 0;
-  padding: 0;
-
-  background-color: whitesmoke;
-
-  /* add font here */
-}
-
 :root {
 
   --PRIMARY_color: #0B8BBE;
+  --BACKGROUND_color: whitesmoke;
 
   --START_color: #04633F;
   --END_color: #880537;
@@ -26,4 +18,13 @@
   --PATH_color: #D0E51A;
   
 
+}
+
+* {
+  margin: 0;
+  padding: 0;
+
+  background-color: var(--BACKGROUND_color);
+
+  /* add font here */
 }

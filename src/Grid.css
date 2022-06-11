@@ -25,6 +25,8 @@ button {
 .Grid_Cell {
     width: 30px;
     height: 30px;
+    /* width: 15px;
+    height: 15px; */
 
     -webkit-user-select: none; /* Safari */
      -khtml-user-select: none; /* Konqueror HTML */
