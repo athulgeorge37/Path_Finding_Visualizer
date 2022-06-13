@@ -1,7 +1,12 @@
+.App {
+    background-color: var(--BACKGROUND_color);
+}
+
 h1 {
     display: flex;
    justify-content: center;   
    margin: 30px 0;
+   color: white;
 }
 
 /* start of tooltip */
@@ -58,6 +63,7 @@ h1 {
 
 .cell_types {   
     margin-top: 50px;
+    /* margin-bottom: 20px; */
     display: flex;
     justify-content: center;
 
@@ -70,7 +76,7 @@ h1 {
 }
 
 .AIR_cell_type {
-    background-color: white;
+    background-color: var(--AIR_color);
 }
 
 .WALL_cell_type {
@@ -101,7 +107,7 @@ h1 {
     width: 30px;
     height: 30px;
     border-radius: 15%;
-    border: 3px solid var(--BACKGROUND_color);
+    border: 3px solid var(--SECONDARY_COLOR);
 }
 
 .cell_type:hover {
@@ -112,11 +118,6 @@ h1 {
 .cell_types .active {
     border: 3px solid orange;
 }
-
-
-
-
-
 
 
 /* end of cell type picker css */
@@ -180,17 +181,26 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
+    color: white;
 }
+
 
 .slider_properties, .animation_speed_div, .cell_weight_incrementer_properties {
     display: flex;
     justify-content: center;
 }
 
+
 .incrementers {
-    margin: 0;
+    margin: 0 5px;
     height: 30px;
     width: 30px;
+    margin-top: 5px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--WALL_color);
 }
 
 .incrementer_display {
@@ -198,9 +208,13 @@ h1 {
     width: fit-content;
     padding-inline: 4px;
     height: 30px;
+    width: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    border-radius: 3px;
+    margin-top: 5px;
 }
 
 
@@ -216,6 +230,7 @@ input[type='range']{
     border-radius: 3px;   
     overflow: hidden;
 }
+
 input[type='range']::-webkit-slider-thumb {
     -webkit-appearance:none;
     appearance:none;
@@ -269,6 +284,8 @@ input[type='range']::-webkit-slider-thumb:hover {
 .all_options {
     display: flex;
     justify-content: space-around;
+
+    background-color: var(--SECONDARY_COLOR);
 }
 
 
@@ -280,7 +297,11 @@ input[type='range']::-webkit-slider-thumb:hover {
     margin-top: 30px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+}
+
+.drop_down_div p {
+    color: white;
+    margin-left: calc(16px + 5px);
 }
 
 .btn {
@@ -288,6 +309,32 @@ input[type='range']::-webkit-slider-thumb:hover {
     display: flex;
     justify-content: flex-start;
     align-items: center;
+
+    /* background-color: #2168f5; */
+}
+
+
+button {
+    display: flex;
+    align-items: center;
+
+    background-color: var(--PRIMARY_color);
+    color: white;
+    /* padding: 10px 16px; */
+    padding: 10px 16px;
+    border-radius: 5px;
+    border: none;
+    max-height: 35px;
+    margin: 5px;
+    
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+.grid_sizes_div .active {
+    background-color: orange;
 }
 
 
@@ -295,9 +342,10 @@ input[type='range']::-webkit-slider-thumb:hover {
     display: flex;
     flex-direction: column;
     width: fit-content;
-    background-color: white;
+    background-color: lightgray;
     border-radius: 3px;
-    margin-top: 70px;
+    margin-top: 57px;
+    margin-left: 5px;
 }
 
 .open {
@@ -314,15 +362,23 @@ input[type='range']::-webkit-slider-thumb:hover {
     display: flex;
     justify-content: flex-start;
     height: 20px;
-    padding: 10px 5px;
-    margin: 2px 0;
+    padding: 5px 17px;
+    margin-bottom: 2px;
     border-radius: 3px;
+    background-color: whitesmoke;
+}
+
+.drop_down_item:last-child {
+    margin-bottom: 0px;
 }
 
 .drop_down_item:hover {
     background-color: var(--PRIMARY_color);
+    color: white;
+    cursor: pointer;
 }
 
 .drop_down .active {
     background-color: var(--PRIMARY_color);
+    color: white;
 }

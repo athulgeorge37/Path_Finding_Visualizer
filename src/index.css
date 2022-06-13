@@ -1,6 +1,7 @@
 :root {
 
   --PRIMARY_color: #0B8BBE;
+  --SECONDARY_COLOR: #283748;
   --BACKGROUND_color: whitesmoke;
 
   --START_color: #04633F;
@@ -15,7 +16,7 @@
   --VISITED_color_1: #29D693;
   --VISITED_color_2: #d6296c;
 
-  --PATH_color: #D0E51A;
+  --PATH_color: #0B8BBE;
   
 
 }
@@ -24,7 +25,28 @@
   margin: 0;
   padding: 0;
 
-  background-color: var(--BACKGROUND_color);
+  font-family: monospace;
 
   /* add font here */
+}
+
+button {
+  display: flex;
+  align-items: center;
+  border: none;
+
+  margin: 5px;
+  padding: 10px 16px;
+  max-height: 35px;
+  /* border: 3px solid var(--PRIMARY_color); */
+  border-radius: 5px;
+
+
+  background-color: var(--PRIMARY_color);
+  color: white;
+  
+}
+
+button:hover {
+  cursor: pointer;
 }
