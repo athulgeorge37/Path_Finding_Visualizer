@@ -1,266 +1,314 @@
-.App {
-    background-color: var(--BACKGROUND_color);
-}
-
-h1 {
-    display: flex;
-   justify-content: center;   
-   margin: 30px 0;
-   color: white;
-}
-
-/* start of tooltip */
-.cell_type {
-    position: relative;
-    display: inline-block;
-}
-
-.cell_info {
-    visibility: hidden;
-    width: 90px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px;
-  
-    /* Position the tooltip */
-    position: absolute;
-    z-index: 1;
-
-    /* how much above the cell u want the tooltip to be for bottom element */
-    bottom: 140%;  
-    left: 50%;
-    /* Use half of the width (120/2 = 60), to center the tooltip for margin left */
-    margin-left: -50px; 
-}
-  
-.cell_type:hover .cell_info {
-    visibility: visible;
-
-    z-index: 2;
-}
-
-.cell_type .cell_info::after {
-    content: " ";
-    position: absolute;
-    top: 100%; /* At the bottom of the tooltip */
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: black transparent transparent transparent;
-}
-
-.cell_types .cell_info_active{
-    visibility: visible;
-}
-
-/* end of tooltip */
-
-
-/* start of cell type picker css */
-
-.cell_types {   
-    margin-top: 50px;
-    /* margin-bottom: 20px; */
-    display: flex;
-    justify-content: center;
-
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
-                                  supported by Chrome, Edge, Opera and Firefox */
-}
-
-.AIR_cell_type {
-    background-color: var(--AIR_color);
-}
-
-.WALL_cell_type {
-    background-color: var(--WALL_color);
-}
-
-.WEIGHTED_cell_type {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.START_cell_type {
-    background-color: var(--START_color);
-}
-
-.MIDDLE_cell_type {
-    background-color: var(--MIDDLE_color);
-}
-
-
-.END_cell_type {
-    background-color: var(--END_color);
-}
-
-.cell_type {
-    margin: 1px;
-    width: 30px;
-    height: 30px;
-    border-radius: 15%;
-    border: 3px solid var(--SECONDARY_COLOR);
-}
-
-.cell_type:hover {
-    border: 3px solid orange;
-    cursor: pointer;
-}
-
-.cell_types .active {
-    border: 3px solid orange;
-}
-
-
-/* end of cell type picker css */
-
-
-/* start of search algo picker css */
-
-.search_algorithms, 
-.maze_algorithms {   
-    display: flex;
-    justify-content: center;
-
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
-                                  supported by Chrome, Edge, Opera and Firefox */
-}
-
-
-.search_algorithms .search_algos,
-.maze_algorithms .maze_algos {
-    width: fit-content;
-    height: 40px;
-    margin: 5px;
-    padding: 5px;
-
-    border-radius: 3px;
-
-    /* background-color: whitesmoke; */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    
-    
-}
-
-
-
-.search_algorithms .search_algos:hover,
-.maze_algorithms .maze_algos:hover {
-    background-color: var(--PRIMARY_color);
-    cursor: pointer;
-
-}
-
-.search_algorithms .active,
-.maze_algorithms .active {
-    background-color: var(--PRIMARY_color);
-    /* #154084 */
-}
-/* end of search algo picker css */
-
-
-
-
-/* start of slider css */
-
-.animation_slider_div, .cell_weight_div {
+/* nav bar start */
+nav {
+    background-color: var(--BACKGROUND_color_DARK);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    color: white;
+    padding-top: 35px;
 }
 
+    /* start of nav row 1 */
+    .nav_row_1 {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-bottom: 10px;
+    }
 
-.slider_properties, .animation_speed_div, .cell_weight_incrementer_properties {
-    display: flex;
-    justify-content: center;
-}
+    .grid_sizes_div {
+        display: flex;
+    }
+
+    .grid_size {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: fit-content;
+        border: 3px solid var(--BACKGROUND_color_DARK);
+    }
+
+    .grid_size:hover {
+        border: 3px solid var(--HIGHLIGHT_color);
+    }
+
+    .grid_sizes_div .active {
+        border: 3px solid var(--HIGHLIGHT_color);
+    }
+
+    h1 {
+        color: white;
+        font-size: xx-large;
+    }
+
+    .cell_types {   
+        /* margin-top: 50px; */
+        /* margin-bottom: 20px; */
+        display: flex;
+        justify-content: center;
+
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+                user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
+    }
+
+    .cell_type {
+        position: relative;
+        display: inline-block;
+
+        margin: 1px;
+        width: 30px;
+        height: 30px;
+        border: 3px solid var(--BACKGROUND_color_DARK);
+        border-radius: 15%;
+    }
+
+    .cell_type:hover {
+        border: 3px solid var(--HIGHLIGHT_color);
+        cursor: pointer;
+    }
+
+    .cell_types .active {
+        border: 3px solid var(--HIGHLIGHT_color);
+    }
+
+    .cell_info {
+        visibility: hidden;
+        text-align: center;
+        position: absolute;
+
+        width: 90px;
+        border-radius: 6px;
+        padding: 5px;
+
+        background-color: var(--PRIMARY_color);
+        color: white;
+        
+        z-index: 1;
+
+        /* how much above the cell u want the tooltip to be for bottom element */
+        bottom: 140%;  
+        left: 50%;
+        /* Use half of the width (120/2 = 60), to center the tooltip for margin left */
+        margin-left: -50px; 
+    }
+
+    .cell_type:hover .cell_info {
+        visibility: visible;
+        z-index: 2;
+    }
+
+    .cell_type .cell_info::after {
+        content: " ";
+        position: absolute;
+
+        top: 100%; /* At the bottom of the tooltip */
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+
+        border-style: solid;
+        border-color: var(--PRIMARY_color) transparent transparent transparent;
+    }
+
+    .cell_types .cell_info_active{
+        visibility: visible;
+    }
 
 
-.incrementers {
-    margin: 0 5px;
-    height: 30px;
-    width: 30px;
-    margin-top: 5px;
+    .AIR_cell_type {
+        background-color: var(--AIR_color);
+    }
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--WALL_color);
-}
+    .WALL_cell_type {
+        background-color: var(--WALL_color);
+    }
 
-.incrementer_display {
-    background-color: var(--PRIMARY_color);
-    width: fit-content;
-    padding-inline: 4px;
-    height: 30px;
-    width: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    .WEIGHTED_cell_type {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-    border-radius: 3px;
-    margin-top: 5px;
-}
+    .START_cell_type {
+        background-color: var(--START_color);
+    }
+
+    .MIDDLE_cell_type {
+        background-color: var(--MIDDLE_color);
+    }
 
 
-input[type='range']{
-    -webkit-appearance:none;
-    appearance:none;
-    margin:5px;
-    width:calc(250px - 10px);
-    width:-webkit-calc(250px - 10px);
-    height:25px;
-    outline:none;
-    background: lightgray;
-    border-radius: 3px;   
-    overflow: hidden;
-}
+    .END_cell_type {
+        background-color: var(--END_color);
+    }
+    /* end of nav row 1 */
 
-input[type='range']::-webkit-slider-thumb {
-    -webkit-appearance:none;
-    appearance:none;
-    width: 25px;
-    height: 25px;
-    background: darkblue;
-    box-shadow: -100vw 0 0 calc(100vw - 12px) var(--PRIMARY_color);
-    cursor: pointer;
-    border-radius: 3px; 
-    border: 3px solid darkblue;
-    /* border-right: 3px solid white; */
-}
+    /* start of nav row 2 */
+    .nav_row_2 {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
 
-input[type='range']::-webkit-slider-thumb:hover {
-    border: 3px solid orange;
-}
+    .animation_slider_div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: white;
+    }
+ 
+    .animation_speed_div {
+        display: flex;
+        justify-content: center;
+    }
 
-/* end of slider css */
+    .incrementers {
+        margin: 5px;
+        height: 30px;
+        width: 30px;
 
-.algo_info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        background-color: var(--SECONDARY_color);
+    }
+
+    .incrementer_display {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background-color: var(--PRIMARY_color);
+        height: 30px;
+        width: 50px;
+        border-radius: 3px;
+        margin: 5px 0;
+    }
+
+    input[type='range']{
+        -webkit-appearance:none;
+        appearance:none;
+        outline:none;
+
+        margin:5px;
+        width:calc(250px - 10px);
+        width:-webkit-calc(250px - 10px);
+        height:25px;
+        border-radius: 3px; 
+        
+        background: lightgray;
+        overflow: hidden;
+    }
+
+    input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance:none;
+        appearance:none;
+
+        width: 25px;
+        height: 25px;
+        border: 3px solid var(--SECONDARY_color);
+        border-radius: 3px; 
+
+        background: var(--SECONDARY_color);
+        box-shadow: -100vw 0 0 calc(100vw - 12px) var(--PRIMARY_color);
+
+        cursor: pointer;
+    }
+
+    .all_drop_downs {
+        display: flex;
+    }
+    
+    .drop_down_div {
+        /* margin-top: 30px; */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .drop_down_div h4 {
+        color: white;
+        margin-left: calc(16px + 5px);
+    }
+
+    .drop_down {
+        display: flex;
+        flex-direction: column;
+
+        border-radius: 3px;
+        margin-top: 57px;
+        margin-left: 5px;
+        width: fit-content;
+
+        /* background-color: lightgray; */
+        background-color: var(--BACKGROUND_color_DARK);
+    }
+
+    .open {
+        visibility: visible;
+        position: absolute;
+    }
+     
+    .closed {
+        visibility: hidden;
+        display: none;
+    }
+
+    .drop_down_item {
+        display: flex;
+        justify-content: flex-start;
+
+        height: 20px;
+        padding: 5px 17px;
+        margin-bottom: 2px;
+        border-radius: 3px;
+
+        color: white;
+
+        background-color: var(--BACKGROUND_color_DARK);
+    }
+    
+    .drop_down_item:last-child {
+        margin-bottom: 0px;
+    }
+    
+    .drop_down_item:hover {
+        background-color: var(--PRIMARY_color);
+        color: white;
+
+        cursor: pointer;
+    }
+    
+    .drop_down .active {
+        background-color: var(--PRIMARY_color);
+        color: white;
+    }
+    
+
+    .cell_weight_slider_div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: white;
+    }
+ 
+    .cell_weight_div {
+        display: flex;
+        justify-content: center;
+    }
+    /* end nav row 2 */
+
+/* nav bar end */
+
 
 
 .page_selection {
     display: flex;
     justify-content: center;
-    /* border-bottom: 2px solid black; */
+    background-color: var(--BACKGROUND_color_LIGHT);
 }
 
 .page_selection .page {
@@ -277,108 +325,4 @@ input[type='range']::-webkit-slider-thumb:hover {
 .page_selection .page:hover {
     color: black;
     cursor: pointer;
-}
-
-
-
-.all_options {
-    display: flex;
-    justify-content: space-around;
-
-    background-color: var(--SECONDARY_COLOR);
-}
-
-
-.all_drop_downs {
-    display: flex;
-}
-
-.drop_down_div {
-    margin-top: 30px;
-    display: flex;
-    flex-direction: column;
-}
-
-.drop_down_div p {
-    color: white;
-    margin-left: calc(16px + 5px);
-}
-
-.btn {
-    width: 200px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-
-    /* background-color: #2168f5; */
-}
-
-
-button {
-    display: flex;
-    align-items: center;
-
-    background-color: var(--PRIMARY_color);
-    color: white;
-    /* padding: 10px 16px; */
-    padding: 10px 16px;
-    border-radius: 5px;
-    border: none;
-    max-height: 35px;
-    margin: 5px;
-    
-}
-
-button:hover {
-    cursor: pointer;
-}
-
-.grid_sizes_div .active {
-    background-color: orange;
-}
-
-
-.drop_down {
-    display: flex;
-    flex-direction: column;
-    width: fit-content;
-    background-color: lightgray;
-    border-radius: 3px;
-    margin-top: 57px;
-    margin-left: 5px;
-}
-
-.open {
-   visibility: visible;
-   position: absolute;
-}
-
-.closed {
-    visibility: hidden;
-    display: none;
-}
-
-.drop_down_item {
-    display: flex;
-    justify-content: flex-start;
-    height: 20px;
-    padding: 5px 17px;
-    margin-bottom: 2px;
-    border-radius: 3px;
-    background-color: whitesmoke;
-}
-
-.drop_down_item:last-child {
-    margin-bottom: 0px;
-}
-
-.drop_down_item:hover {
-    background-color: var(--PRIMARY_color);
-    color: white;
-    cursor: pointer;
-}
-
-.drop_down .active {
-    background-color: var(--PRIMARY_color);
-    color: white;
 }

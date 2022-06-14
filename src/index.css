@@ -1,8 +1,10 @@
 :root {
 
   --PRIMARY_color: #0B8BBE;
-  --SECONDARY_COLOR: #283748;
-  --BACKGROUND_color: whitesmoke;
+  --SECONDARY_color: #001b53;
+  --HIGHLIGHT_color: orange;
+  --BACKGROUND_color_LIGHT: whitesmoke;
+  --BACKGROUND_color_DARK: #283748;
 
   --START_color: #04633F;
   --END_color: #880537;
