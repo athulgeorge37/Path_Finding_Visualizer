@@ -245,7 +245,7 @@ function App() {
 							onClick={() => set_algo_drop_down_open(!algo_drop_down_open)}
 						>
 							{search_algorithms.current_algorithm}
-							<img src="/images/dropdown-arrow.png" alt="drop_down_arror" />
+							<img src="./images/dropdown-arrow.png" alt="drop_down_arrow" />
 						</button>
 
 						<div className={"drop_down " + (algo_drop_down_open ? "open" : "closed")}>
@@ -268,7 +268,7 @@ function App() {
 							onClick={() => set_maze_drop_down_open(!maze_drop_down_open)}
 						>
 							{maze_algorithms.current_maze}
-							<img src="/images/dropdown-arrow.png" alt="drop_down_arror" />
+							<img src="./images/dropdown-arrow.png" alt="drop_down_arror" />
 						</button>
 
 						<div className={"drop_down " + (maze_drop_down_open ? "open" : "closed")}>
@@ -291,7 +291,7 @@ function App() {
 							onClick={() => set_clear_drop_down_open(!clear_drop_down_open)}
 						>
 							{clear_options.current_clear_option}
-							<img src="/images/dropdown-arrow.png" alt="drop_down_arror" />
+							<img src="./images/dropdown-arrow.png" alt="drop_down_arror" />
 						</button>
 
 						<div className={"drop_down " + (clear_drop_down_open ? "open" : "closed")}>
