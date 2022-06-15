@@ -18,6 +18,9 @@ import animate_weighted_cells from './animations/animate_weighted_cells';
 import animate_visited_cells from './animations/animate_visited_cells';
 import animate_path_cells from './animations/animate_path_cells';
 
+// Stack import for undoing user inputs
+import { Stack } from "./Stack";
+
 
 const START_CELL_COLOR = "#04633F"
 const END_CELL_COLOR = "#880537"
@@ -102,6 +105,8 @@ const initialise_empty_grid = () => {
     return empty_grid
 }
 
+// tracking user click and drag inputs, so they can be undone
+const user_inputs = new Stack();
 
 function Grid(props) {
 
@@ -113,12 +118,11 @@ function Grid(props) {
 
     useEffect(() => {
 
-		const nav_bar_width = document.getElementById("nav_bar").clientWidth
 		const nav_bar_height = document.getElementById("nav_row_1").clientHeight +
 							   document.getElementById("nav_row_2").clientHeight +
 							   document.getElementById("nav_row_3").clientHeight
 
-        const grid_width_px = nav_bar_width
+        const grid_width_px = document.getElementById("nav_bar").clientWidth
         const grid_height_px = window.innerHeight - nav_bar_height
 
         if (props.current_grid_size === "Small") {
@@ -138,7 +142,7 @@ function Grid(props) {
 
         }
 
-        // making dimensions an odd number
+        // making dimensions an odd number, as it works better for maze generation
         GRID_WIDTH = (GRID_WIDTH % 2 === 0 ? GRID_WIDTH - 1: GRID_WIDTH)
         GRID_HEIGHT = (GRID_HEIGHT % 2 === 0 ? GRID_HEIGHT - 1: GRID_HEIGHT)
 
@@ -232,6 +236,7 @@ function Grid(props) {
             }
         }
 
+        user_inputs.makeEmpty()
         set_algorithm_stats({no_visited_cells: 0, path_length: 0, path_cost: 0})
     }
 
@@ -297,8 +302,10 @@ function Grid(props) {
 
     const update_cell_type = (my_key, x, y) => {
 
-        let new_class_name = my_key + " Grid_Cell "
         const prev_cell_state = my_Grid[y][x].cell_state
+        const prev_cell_weight = my_Grid[y][x].weight
+
+        let new_class_name = my_key + " Grid_Cell "
         let can_be_updated = true
 
         // default cell color will be of air cells
@@ -391,6 +398,15 @@ function Grid(props) {
             new_class_name += props.active_cell_type
 
             change_cell_colors(my_Grid[y][x], new_cell_color, new_cell_border_color, new_class_name)
+
+            if (!["START", "END", "MIDDLE"].includes(props.active_cell_type)) {
+                user_inputs.push( {
+                    cell: my_Grid[y][x],                                 
+                    prev_state: prev_cell_state, 
+                    prev_weight: prev_cell_weight
+                } )
+            }
+            
         }
 
     }
@@ -556,7 +572,37 @@ function Grid(props) {
         }
     }
 
+    const handle_undo = () => {
 
+        const popped_input = user_inputs.pop()
+
+        if (popped_input === "Empty Stack") {
+            console.log("Empty Stack")
+            return
+        }
+        console.log(popped_input)
+
+        console.log("current state ", popped_input.cell.cell_state)
+        console.log("prev state ",popped_input.prev_state)
+
+        my_grid_ref.current[popped_input.cell.y_val][popped_input.cell.x_val].innerText = null
+
+        // updating the cell to the prev state
+        if (popped_input.prev_state === "WALL") {
+            change_cell_colors(popped_input.cell, WALL_CELL_COLOR, WALL_CELL_COLOR)
+        } else if (popped_input.prev_state === "AIR") {
+            change_cell_colors(popped_input.cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
+        } else if (popped_input.prev_state === "WEIGHTED") {
+            my_grid_ref.current[popped_input.cell.y_val][popped_input.cell.x_val].innerText = popped_input.prev_weight
+            const old_color = props.calcColor(2, 50, popped_input.prev_weight)
+            change_cell_colors(popped_input.cell, old_color, old_color)
+        } 
+
+        // updating the grid to have the old cell properties, so search algos work
+        my_Grid[popped_input.cell.y_val][popped_input.cell.x_val].cell_state = popped_input.prev_state
+        my_Grid[popped_input.cell.y_val][popped_input.cell.x_val].weight = popped_input.prev_weight
+        
+    }
 
     return (
         <>  
@@ -566,6 +612,7 @@ function Grid(props) {
                 <button onClick={Start_Search_Algorithm} className="search_btn">Visualize {props.current_algorithm}</button>
                 <button onClick={Start_Maze_Algorithm} className="maze_btn">Visualize {props.current_maze}</button>
                 <button onClick={Start_Clear_Grid_Option} className="clear_btn">{props.current_clear_option}</button>
+                <button onClick={handle_undo}>Undo</button>
 
             </div>
 

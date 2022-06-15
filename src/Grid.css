@@ -38,10 +38,9 @@
 
 
 .Grid_Cell {
-    width: 30px;
-    height: 30px;
-    /* width: 15px;
-    height: 15px; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     -webkit-user-select: none; /* Safari */
      -khtml-user-select: none; /* Konqueror HTML */
@@ -59,15 +58,10 @@
 
 
 .WEIGHTED {    
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
     color: black;
 }
 
 .WEIGHTED_Animated {
-   
     animation: animate_weights 0.5s ease-in-out 0s;
 }
 
