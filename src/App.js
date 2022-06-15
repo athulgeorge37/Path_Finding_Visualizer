@@ -3,6 +3,7 @@ import './App.css';
 import React, { useEffect, useState } from "react";
 import Grid from "./Grid";
 
+
 // info pages for algorithms imports
 import Dijkstras_Info_Page from './Dijkstras_Info_Page';
 import Recursive_Division_info_page from './Recursive_Division_info_page';
@@ -15,7 +16,7 @@ function App() {
 	// start of nav bar logic
 
     const [grid_size, set_grid_size] = useState({
-		active_size: "Medium",
+		active_size: "Small",
 		available_sizes: ["Small", "Medium", "Large"]
 	});
     const toggle_active_grid_size = (index) => {
@@ -158,175 +159,187 @@ function App() {
   return (
 	<>
 		 <nav id="nav_bar">
-                <div className="nav_row_1" id="nav_row_1">
-                    <div className="grid_sizes_div">
-                        {grid_size.available_sizes.map((size, index) => {
-                            return(
-                                <button 
-                                    key={index} 
-                                    onClick={() => toggle_active_grid_size(index)} 
-                                    className={"grid_size size_" + size + (size === grid_size.active_size ? " active" : "")}
-                                >{size}
-                                </button>
-                            )
-                        })}
-                    </div>
+			<div className="nav_row_1" id="nav_row_1">
+				<div className='grid_sizes_div_with_heading'>
+					<h4>Grid Size:</h4>
+					<div className="grid_sizes_div">
+						{grid_size.available_sizes.map((size, index) => {
+							return(
+								<button 
+									key={index} 
+									onClick={() => toggle_active_grid_size(index)} 
+									className={"grid_size size_" + size + (size === grid_size.active_size ? " active" : "")}
+								>{size}
+								</button>
+							)
+						})}
+					</div>
+				</div>
 
-                    <h1>Path Finding Visualizer</h1>
+				<h1>Path Finding Visualizer</h1>
 
-                    <div className="cell_types">
-						{my_cell_type.cell_types.map((cell, index) => {
+				<div className="cell_types">
+					{my_cell_type.cell_types.map((cell, index) => {
 
-							if (cell === "WEIGHTED") {
-								const my_new_color = calcColor(2, 50, cell_weight)
-								return (
-									<div
-										key={index}
-										className={cell + (cell === my_cell_type.active_cell ? "_cell_type cell_type active" : "_cell_type cell_type")}
-										onClick={() => toggle_active_cell_type(index)}
-
-										style={ {backgroundColor: my_new_color} }
-
-									>{cell_weight}
-									<span className={"cell_info " + (cell === my_cell_type.active_cell ? "cell_info_active" : "")}>WEIGHT</span></div>
-								)
-							}
-
-
+						if (cell === "WEIGHTED") {
+							const my_new_color = calcColor(2, 50, cell_weight)
 							return (
 								<div
 									key={index}
 									className={cell + (cell === my_cell_type.active_cell ? "_cell_type cell_type active" : "_cell_type cell_type")}
 									onClick={() => toggle_active_cell_type(index)}
-								><span className={"cell_info " + (cell === my_cell_type.active_cell ? "cell_info_active" : "")}>{cell}</span></div>
+
+									style={ {backgroundColor: my_new_color} }
+
+								>{cell_weight}
+								<span className={"cell_info " + (cell === my_cell_type.active_cell ? "cell_info_active" : "")}>WEIGHT</span></div>
 							)
-						})}
+						}
+
+
+						return (
+							<div
+								key={index}
+								className={cell + (cell === my_cell_type.active_cell ? "_cell_type cell_type active" : "_cell_type cell_type")}
+								onClick={() => toggle_active_cell_type(index)}
+							><span className={"cell_info " + (cell === my_cell_type.active_cell ? "cell_info_active" : "")}>{cell}</span></div>
+						)
+					})}
+				</div>
+
+			</div>
+
+			<div className="nav_row_2" id="nav_row_2">
+				<div className="animation_slider_div">
+					<h4>Animation Delay:</h4>
+					<div className="animation_speed_div">
+						<button 
+							onClick={() => increment_animation_speed(animation_speed - 1)}
+							className="incrementers"
+						>-</button>
+						<div className="incrementer_display">{animation_speed} ms</div>
+						<button 
+							onClick={() => increment_animation_speed(animation_speed + 1)}
+							className="incrementers"
+						>+</button>
 					</div>
 
-                </div>
+					<div className="slider_properties">
+						<input 
+							type="range" 
+							min={0} 
+							max={50} 
+							value={animation_speed} 
+							onChange={(e) => set_animation_speed(parseInt(e.target.value))}
 
-                <div className="nav_row_2" id="nav_row_2">
-                    <div className="animation_slider_div">
-                        <h4>Animation Delay:</h4>
-                        <div className="animation_speed_div">
-                            <button 
-                                onClick={() => increment_animation_speed(animation_speed - 1)}
-                                className="incrementers"
-                            >-</button>
-                            <div className="incrementer_display">{animation_speed} ms</div>
-                            <button 
-                                onClick={() => increment_animation_speed(animation_speed + 1)}
-                                className="incrementers"
-                            >+</button>
-                        </div>
-
-                        <div className="slider_properties">
-                            <input 
-                                type="range" 
-                                min={0} 
-                                max={50} 
-                                value={animation_speed} 
-                                onChange={(e) => set_animation_speed(parseInt(e.target.value))}
-
-                                className="slider"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="all_drop_downs">
-                        <div className="search_drop_down drop_down_div">
-                            <h4>Algorithms:</h4>
-                            <button
-                                className='search_button btn'
-                                onClick={() => set_algo_drop_down_open(!algo_drop_down_open)}
-                            >{search_algorithms.current_algorithm} V</button>
-
-                            <div className={"drop_down " + (algo_drop_down_open ? "open" : "closed")}>
-                                {search_algorithms.available_algorithms.map((algo, index) => {
-                                    return (
-                                        <div
-                                            key={index}
-                                            className={"drop_down_item " + (algo === search_algorithms.current_algorithm ? "active" : "")}
-                                            onClick={() => toggle_active_search_algo(index)}
-                                        >{algo}</div>
-                                    )
-                                })}
-                            </div>
-                        </div>
-
-                        <div className="maze_drop_down drop_down_div">
-                            <h4>Mazes:</h4>
-                            <button
-                                className='maze_button btn'
-                                onClick={() => set_maze_drop_down_open(!maze_drop_down_open)}
-                            >{maze_algorithms.current_maze} V</button>
-
-                            <div className={"drop_down " + (maze_drop_down_open ? "open" : "closed")}>
-                                {maze_algorithms.available_mazes.map((maze, index) => {
-                                    return (
-                                        <div
-                                            key={index}
-                                            className={"drop_down_item " + (maze === maze_algorithms.current_maze ? "active" : "")}
-                                            onClick={() => toggle_active_maze_algo(index)}
-                                        >{maze}</div>
-                                    )
-                                })}
-						    </div>
-					    </div>
-
-                        <div className="clear_drop_down drop_down_div">
-                            <h4>Clear:</h4>
-                            <button
-                                className='clear_button btn'
-                                onClick={() => set_clear_drop_down_open(!clear_drop_down_open)}
-                            >{clear_options.current_clear_option} V</button>
-
-                            <div className={"drop_down " + (clear_drop_down_open ? "open" : "closed")}>
-                                {clear_options.available_clear_options.map((clear, index) => {
-                                    return (
-                                        <div
-                                            key={index}
-                                            className={"drop_down_item " + (clear === clear_options.current_clear_option ? "active" : "")}
-                                            onClick={() => toggle_active_clear_option(index)}
-                                        >{clear}</div>
-                                    )
-                                })}
-                            </div>
-					    </div>
-                    </div>
-
-                    <div className="cell_weight_slider_div">
-						<h4>Cell Weight:</h4>
-						<div className="cell_weight_div">
-							<button 
-								onClick={() => increment_cell_weight(cell_weight - 1)}
-								className="incrementers"
-							>-</button>
-							<div className="incrementer_display">{cell_weight}</div>
-							<button 
-								onClick={() => increment_cell_weight(cell_weight + 1)}
-								className="incrementers"
-							>+</button>
-						</div>
-
-						<div className="slider_properties">
-							<input 
-								type="range" 
-								min={2} 
-								max={50} 
-								value={cell_weight} 
-								onChange={(e) => {
-									set_cell_weight(parseInt(e.target.value))
-									toggle_active_cell_type(2)
-								}}
-								className="slider"
-							/>
-						</div>
-
+							className="slider"
+						/>
 					</div>
-                </div>
+				</div>
 
-            </nav>
+				<div className="all_drop_downs">
+					<div className="search_drop_down drop_down_div">
+						<h4>Algorithms:</h4>
+						<button
+							className={"search_button btn btn_" + (algo_drop_down_open ? "open" : "closed")}
+							onClick={() => set_algo_drop_down_open(!algo_drop_down_open)}
+						>
+							{search_algorithms.current_algorithm}
+							<img src="/images/dropdown-arrow.png" alt="drop_down_arror" />
+						</button>
+
+						<div className={"drop_down " + (algo_drop_down_open ? "open" : "closed")}>
+							{search_algorithms.available_algorithms.map((algo, index) => {
+								return (
+									<div
+										key={index}
+										className={"drop_down_item " + (algo === search_algorithms.current_algorithm ? "active" : "")}
+										onClick={() => toggle_active_search_algo(index)}
+									>{algo}</div>
+								)
+							})}
+						</div>
+					</div>
+
+					<div className="maze_drop_down drop_down_div">
+						<h4>Mazes:</h4>
+						<button
+							className={"maze_button btn btn_" + (maze_drop_down_open ? "open" : "closed")}
+							onClick={() => set_maze_drop_down_open(!maze_drop_down_open)}
+						>
+							{maze_algorithms.current_maze}
+							<img src="/images/dropdown-arrow.png" alt="drop_down_arror" />
+						</button>
+
+						<div className={"drop_down " + (maze_drop_down_open ? "open" : "closed")}>
+							{maze_algorithms.available_mazes.map((maze, index) => {
+								return (
+									<div
+										key={index}
+										className={"drop_down_item " + (maze === maze_algorithms.current_maze ? "active" : "")}
+										onClick={() => toggle_active_maze_algo(index)}
+									>{maze}</div>
+								)
+							})}
+						</div>
+					</div>
+
+					<div className="clear_drop_down drop_down_div">
+						<h4>Clear:</h4>
+						<button
+							className={"clear_button btn btn_" + (clear_drop_down_open ? "open" : "closed")}
+							onClick={() => set_clear_drop_down_open(!clear_drop_down_open)}
+						>
+							{clear_options.current_clear_option}
+							<img src="/images/dropdown-arrow.png" alt="drop_down_arror" />
+						</button>
+
+						<div className={"drop_down " + (clear_drop_down_open ? "open" : "closed")}>
+							{clear_options.available_clear_options.map((clear, index) => {
+								return (
+									<div
+										key={index}
+										className={"drop_down_item " + (clear === clear_options.current_clear_option ? "active" : "")}
+										onClick={() => toggle_active_clear_option(index)}
+									>{clear}</div>
+								)
+							})}
+						</div>
+					</div>
+				</div>
+
+				<div className="cell_weight_slider_div">
+					<h4>Cell Weight:</h4>
+					<div className="cell_weight_div">
+						<button 
+							onClick={() => increment_cell_weight(cell_weight - 1)}
+							className="incrementers"
+						>-</button>
+						<div className="incrementer_display">{cell_weight}</div>
+						<button 
+							onClick={() => increment_cell_weight(cell_weight + 1)}
+							className="incrementers"
+						>+</button>
+					</div>
+
+					<div className="slider_properties">
+						<input 
+							type="range" 
+							min={2} 
+							max={50} 
+							value={cell_weight} 
+							onChange={(e) => {
+								set_cell_weight(parseInt(e.target.value))
+								toggle_active_cell_type(2)
+							}}
+							className="slider"
+						/>
+					</div>
+
+				</div>
+			</div>
+
+        </nav>
 
 
 			<Grid 

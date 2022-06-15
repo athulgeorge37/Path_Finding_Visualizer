@@ -37,11 +37,6 @@ const PATH_CELL_COLOR = "#0B8BBE"
 let GRID_HEIGHT = 21  // y
 let GRID_WIDTH = 45  // x
 
-// const GRID_HEIGHT = 43  // y
-// const GRID_WIDTH = 91  // x
-// make it so that grid size depends on user's screen size
-
-
 // these are the default start and end values when page initially reloads
 let START_CELL_X = 12
 let START_CELL_Y = 10
@@ -65,6 +60,7 @@ let my_end_cell = {
 }
 
 let middle_stop = null
+
 
 // initialising the grid, also called when clearing the grid
 const initialise_empty_grid = () => {
@@ -111,44 +107,42 @@ function Grid(props) {
 
 
     const [my_Grid, set_my_Grid] = useState(initialise_empty_grid)
+    const [algorithm_stats, set_algorithm_stats] = useState({no_visited_cells: 0, path_length: 0, path_cost: 0})
     const [mouse_down, set_mouse_down] = useState(false)
     const my_grid_ref = useRef([])
 
-    // const [available_grid_size, set_available_grid_size] = useState({grid_width: 0, grid_height: 0})
-
     useEffect(() => {
-
-        console.log("running use effect")
 
 		const nav_bar_width = document.getElementById("nav_bar").clientWidth
 		const nav_bar_height = document.getElementById("nav_row_1").clientHeight +
 							   document.getElementById("nav_row_2").clientHeight +
 							   document.getElementById("nav_row_3").clientHeight
 
-
-        const new_grid_size = { grid_width: nav_bar_width, grid_height: window.innerHeight - nav_bar_height }
-        console.log("new_grid_size", new_grid_size)
+        const grid_width_px = nav_bar_width
+        const grid_height_px = window.innerHeight - nav_bar_height
 
         if (props.current_grid_size === "Small") {
 
-            GRID_WIDTH = Math.floor(new_grid_size.grid_width / 45)
-            GRID_HEIGHT = Math.floor(new_grid_size.grid_height / 43)
+            GRID_WIDTH = Math.floor(grid_width_px / 32)
+            GRID_HEIGHT = Math.floor(grid_height_px / 31)
 
         } else if (props.current_grid_size === "Medium") {
 
-            GRID_WIDTH = Math.floor(new_grid_size.grid_width / 32)
-            GRID_HEIGHT = Math.floor(new_grid_size.grid_height / 31)
+            GRID_WIDTH = Math.floor(grid_width_px / 25)
+            GRID_HEIGHT = Math.floor(grid_height_px / 23)
 
         } else if (props.current_grid_size === "Large") {
 
-            GRID_WIDTH = Math.floor(new_grid_size.grid_width / 16)
-            GRID_HEIGHT = Math.floor(new_grid_size.grid_height / 15)
+            GRID_WIDTH = Math.floor(grid_width_px / 17)
+            GRID_HEIGHT = Math.floor(grid_height_px / 15)
 
         }
 
+        // making dimensions an odd number
         GRID_WIDTH = (GRID_WIDTH % 2 === 0 ? GRID_WIDTH - 1: GRID_WIDTH)
         GRID_HEIGHT = (GRID_HEIGHT % 2 === 0 ? GRID_HEIGHT - 1: GRID_HEIGHT)
 
+        // new start coordinates
         START_CELL_X = Math.floor(GRID_WIDTH / 3)
         START_CELL_Y = Math.floor(GRID_HEIGHT / 2)
 
@@ -159,6 +153,7 @@ function Grid(props) {
             cell_state: "START"
         }
 
+        // new end coordinates
         END_CELL_X = Math.floor(GRID_WIDTH / 3) * 2
         END_CELL_Y = Math.floor(GRID_HEIGHT / 2)
 
@@ -168,18 +163,17 @@ function Grid(props) {
             my_key: "(" + END_CELL_X.toString() + ", " + END_CELL_Y.toString() + ")",
             cell_state: "END"
         }
+
+        middle_stop = null
         
-
-        // console.log("new GRID_WIDTH", GRID_WIDTH)
-        // console.log("new GRID_HEIGHT", GRID_HEIGHT)
-
-        // console.log("START", START_CELL_X, START_CELL_Y)
-        // console.log("END", END_CELL_X, END_CELL_Y)
-
         set_my_Grid(initialise_empty_grid)
 
-
 	}, [props.current_grid_size]);
+
+
+    useEffect(() => {
+        clear_grid()
+    }, [my_Grid])
 
 
     // clearing grid options
@@ -237,6 +231,8 @@ function Grid(props) {
 
             }
         }
+
+        set_algorithm_stats({no_visited_cells: 0, path_length: 0, path_cost: 0})
     }
 
     const clear_visited_and_path_cells = () => {
@@ -253,6 +249,8 @@ function Grid(props) {
                 }
             }
         }
+
+        set_algorithm_stats({no_visited_cells: 0, path_length: 0, path_cost: 0})
     }
 
     const clear_wall_cells = () => {
@@ -478,10 +476,21 @@ function Grid(props) {
             curr_start = middle_stops[k]
         }
 
+        let my_path_length = 0
+        let my_path_cost = 0
+        for (const cell_path of all_valid_paths) { 
+            for (const cell of cell_path) {
+                my_path_cost += cell.weight
+            }
+            my_path_length += cell_path.length
+        }
+
+        let flattened_visited_cells = [].concat.apply([], all_visited_cells);
+        let unique_visited_cells = [...new Set(flattened_visited_cells)];
+        let my_no_visited_cells = unique_visited_cells.length
+
 
         // animating the visited cells
-        
-
         // maybe slow_visited_animation can instead be a value between 0 and 1 which multiples animation speed to adjust animation based on algo
         const visited_colors = [VISITED_CELL_COLOR_1, VISITED_CELL_COLOR_2]
         const visited_animation_type = ["1", "2"]
@@ -494,7 +503,6 @@ function Grid(props) {
 
             n += 1
         }
-    
         
         // animating the valid path cells
         for (const cell_path of all_valid_paths) {
@@ -502,6 +510,8 @@ function Grid(props) {
                                                my_start_cell, my_end_cell, middle_stop, 
                                                PATH_CELL_COLOR, change_cell_colors) + props.animation_speed
         }
+
+        set_algorithm_stats({no_visited_cells: my_no_visited_cells, path_length: my_path_length, path_cost: my_path_cost})
 
     }
 
@@ -548,8 +558,6 @@ function Grid(props) {
 
 
 
-
-
     return (
         <>  
 
@@ -561,8 +569,10 @@ function Grid(props) {
 
             </div>
 
-
             <div className="Grid" id="Grid">
+
+                <p>Visited {algorithm_stats.no_visited_cells} cells out of {GRID_HEIGHT * GRID_WIDTH}, Path Length = {algorithm_stats.path_length}, Path Cost = {algorithm_stats.path_cost}</p>
+                
                 {my_Grid.map((row, row_ID) => {
                     my_grid_ref.current[row_ID] = []
                     return (
@@ -574,9 +584,9 @@ function Grid(props) {
 
                                 let pixel_size = 0
                                 if (props.current_grid_size === "Small") {
-                                    pixel_size = 43
-                                } else if (props.current_grid_size === "Medium") {
                                     pixel_size = 30
+                                } else if (props.current_grid_size === "Medium") {
+                                    pixel_size = 22.5
                                 } else if (props.current_grid_size === "Large") {
                                     pixel_size = 15
                                 } 

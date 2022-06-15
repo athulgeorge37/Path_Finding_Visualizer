@@ -14,6 +14,13 @@ nav {
         margin-bottom: 10px;
     }
 
+    .grid_sizes_div_with_heading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: white;
+    }
+
     .grid_sizes_div {
         display: flex;
     }
@@ -35,7 +42,7 @@ nav {
         border: 3px solid var(--HIGHLIGHT_color);
     }
 
-    h1 {
+    .nav_row_1 h1 {
         color: white;
         font-size: xx-large;
     }
@@ -224,15 +231,35 @@ nav {
     }
     
     .drop_down_div {
-        /* margin-top: 30px; */
         display: flex;
         flex-direction: column;
     }
 
     .drop_down_div h4 {
         color: white;
-        margin-left: calc(16px + 5px);
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
     }
+
+    .btn img {
+        margin-left: 5px;
+        height: 10px;
+        filter: brightness(0) invert(1);  
+        /* changing drop down to white using filter */
+        transition: 100ms;
+    }
+
+    .btn_closed img {
+        transform: rotate(-90deg);
+    }
+
+    .btn_open img {
+        transform: rotate(0deg);
+    }
+
 
     .drop_down {
         display: flex;
@@ -243,16 +270,15 @@ nav {
         margin-left: 5px;
         width: fit-content;
 
-        /* background-color: lightgray; */
         background-color: var(--BACKGROUND_color_DARK);
     }
 
-    .open {
+    .drop_down_div .open {
         visibility: visible;
         position: absolute;
     }
      
-    .closed {
+    .drop_down_div .closed {
         visibility: hidden;
         display: none;
     }
@@ -269,7 +295,9 @@ nav {
         color: white;
 
         background-color: var(--BACKGROUND_color_DARK);
+
     }
+
     
     .drop_down_item:last-child {
         margin-bottom: 0px;
