@@ -355,7 +355,7 @@ function App() {
 				current_clear_option={clear_options.current_clear_option}
  			/>
 
-			<div className="page_selection">
+			{/* <div className="page_selection">
 				{pages.available_pages.map((my_page, index) => {
 					return (
 						<h2
@@ -370,7 +370,7 @@ function App() {
 
 			<div className="render_page">
 				{render_appropriate_page()}
-			</div>
+			</div> */}
 	</>
   )
 }

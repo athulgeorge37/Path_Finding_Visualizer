@@ -64,6 +64,9 @@ let my_end_cell = {
 
 let middle_stop = null
 
+let animation_in_progress = false
+
+let all_timeouts = []
 
 // initialising the grid, also called when clearing the grid
 const initialise_empty_grid = () => {
@@ -117,6 +120,11 @@ function Grid(props) {
     const my_grid_ref = useRef([])
 
     useEffect(() => {
+
+        // preventing user from undoing while previous animation is in progress
+        if (animation_in_progress) {
+            stop_animation()
+        }
 
 		const nav_bar_height = document.getElementById("nav_row_1").clientHeight +
 							   document.getElementById("nav_row_2").clientHeight +
@@ -210,6 +218,9 @@ function Grid(props) {
         change_cell_colors(my_end_cell, END_CELL_COLOR, END_CELL_COLOR)
         
         middle_stop = null
+
+        user_inputs.makeEmpty()
+
         set_my_Grid(initialise_empty_grid)
     }
 
@@ -413,10 +424,21 @@ function Grid(props) {
 
     // handling clicking and click and drag events
     const handle_mouse_click = (x, y, my_key) => {  
+
+        // preventing user from clicking while previous animation is in progress
+        if (animation_in_progress) {
+            return
+        }
+
         update_cell_type(my_key, x, y)
     }
 
     const handle_mouse_down = (x, y, my_key) => {   
+
+        // preventing user from clicking and dragging while previous animation is in progress
+        if (animation_in_progress) {
+            return
+        }
         
         try {
             update_cell_type(my_key, x, y)
@@ -429,17 +451,33 @@ function Grid(props) {
 
     const handle_mouse_enter = (x, y, my_key) => {
 
+        // preventing user from clicking and dragging while previous animation is in progress
+        if (animation_in_progress) {
+            return
+        }
+
         if (mouse_down) {
             update_cell_type(my_key, x, y)
         }
     }
 
     const handle_mouse_up = () => {
+
+        // preventing user from clicking and dragging while previous animation is in progress
+        if (animation_in_progress) {
+            return
+        }
+
         set_mouse_down(false)
     }
 
     // starting search, maze, clear algorithms
     const Start_Search_Algorithm = () => {
+
+        // preventing user from starting a search algo while previous animation is in progress
+        if (animation_in_progress) {
+            return
+        }
 
         // my_grid_ref.current[0][0].scrollIntoView()
         clear_visited_and_path_cells()
@@ -505,7 +543,8 @@ function Grid(props) {
         let unique_visited_cells = [...new Set(flattened_visited_cells)];
         let my_no_visited_cells = unique_visited_cells.length
 
-
+        all_timeouts = []
+        animation_in_progress = true
         // animating the visited cells
         // maybe slow_visited_animation can instead be a value between 0 and 1 which multiples animation speed to adjust animation based on algo
         const visited_colors = [VISITED_CELL_COLOR_1, VISITED_CELL_COLOR_2]
@@ -513,19 +552,29 @@ function Grid(props) {
 
         let n = 0
         for (const visited_cells of all_visited_cells) {
-            time_finished = animate_visited_cells(visited_cells, time_finished, slow_visited_animation, props.animation_speed, 
+            const [my_timeouts, my_time_finished] = animate_visited_cells(visited_cells, time_finished, slow_visited_animation, props.animation_speed, 
                                                 my_start_cell, my_end_cell, middle_stop, 
-                                                visited_colors[n], visited_animation_type[n], change_cell_colors) + props.animation_speed
-
+                                                visited_colors[n], visited_animation_type[n], change_cell_colors)
             n += 1
+
+            time_finished = my_time_finished + props.animation_speed
+            all_timeouts = all_timeouts.concat(my_timeouts)
         }
+
         
         // animating the valid path cells
         for (const cell_path of all_valid_paths) {
-            time_finished = animate_path_cells(cell_path, time_finished, props.animation_speed, 
+            const [my_timeouts, my_time_finished] = animate_path_cells(cell_path, time_finished, props.animation_speed, 
                                                my_start_cell, my_end_cell, middle_stop, 
-                                               PATH_CELL_COLOR, change_cell_colors) + props.animation_speed
+                                               PATH_CELL_COLOR, change_cell_colors)
+
+            time_finished = my_time_finished + props.animation_speed
+            all_timeouts = all_timeouts.concat(my_timeouts)
         }
+
+        setTimeout(() => {
+            animation_in_progress = false
+        }, time_finished)
 
         set_algorithm_stats({no_visited_cells: my_no_visited_cells, path_length: my_path_length, path_cost: my_path_cost})
 
@@ -533,31 +582,58 @@ function Grid(props) {
 
     const Start_Maze_Algorithm = () => {
 
+        // preventing user from starting a maze algo while previous animation is in progress
+        if (animation_in_progress) {
+            return
+        }
+
         // my_grid_ref.current[0][0].scrollIntoView()
         clear_visited_and_path_cells()
 
+        animation_in_progress = true
+
+        let my_timeouts = []
+
+        let time_finished = 0
         if ( props.current_maze === "Recursive Division") {
             clear_wall_cells()
             const walls_to_render = Recursive_Division_Algorithm("NONE", 0, 0, GRID_HEIGHT, GRID_WIDTH, my_start_cell, my_end_cell, my_Grid, null)
-            animate_wall_cells(walls_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, WALL_CELL_COLOR, change_cell_colors)
+            my_timeouts = animate_wall_cells(walls_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, WALL_CELL_COLOR, change_cell_colors)
+            time_finished = props.animation_speed * walls_to_render.length
         } else if ( props.current_maze === "Horizontal Skew Recursive Division") {
             clear_wall_cells()
             const walls_to_render = Recursive_Division_Algorithm("H", 0, 0, GRID_HEIGHT, GRID_WIDTH, my_start_cell, my_end_cell, my_Grid, null)
-            animate_wall_cells(walls_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, WALL_CELL_COLOR, change_cell_colors)
+            my_timeouts = animate_wall_cells(walls_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, WALL_CELL_COLOR, change_cell_colors)
+            time_finished = props.animation_speed * walls_to_render.length
         } else if ( props.current_maze === "Vertical Skew Recursive Division") {
             clear_wall_cells()
             const walls_to_render = Recursive_Division_Algorithm("V", 0, 0, GRID_HEIGHT, GRID_WIDTH, my_start_cell, my_end_cell, my_Grid, null)
-            animate_wall_cells(walls_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, WALL_CELL_COLOR, change_cell_colors)
+            my_timeouts = animate_wall_cells(walls_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, WALL_CELL_COLOR, change_cell_colors)
+            time_finished = props.animation_speed * walls_to_render.length
         } else if ( props.current_maze === "Scattered WALLS") {
             const walls_to_render = Scattered_Maze_WALL(my_start_cell, my_end_cell, my_Grid)
-            animate_wall_cells(walls_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, WALL_CELL_COLOR, change_cell_colors)
+            my_timeouts = animate_wall_cells(walls_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, WALL_CELL_COLOR, change_cell_colors)
+            time_finished = props.animation_speed * walls_to_render.length
         } else if ( props.current_maze === "Scattered WEIGHTS") {
             const cells_to_render = Scattered_Maze_WEIGHTED(my_start_cell, my_end_cell, my_Grid)
-            animate_weighted_cells(cells_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, change_cell_colors, props.calcColor)
+            my_timeouts = animate_weighted_cells(cells_to_render, props.animation_speed, middle_stop, my_Grid, my_grid_ref, change_cell_colors, props.calcColor)
+            time_finished = props.animation_speed * cells_to_render.length
         }
+
+        all_timeouts = all_timeouts.concat(my_timeouts)
+
+        setTimeout(() => {
+            animation_in_progress = false
+        }, time_finished)
+
     }
 
     const Start_Clear_Grid_Option = () => {
+
+        // preventing user from clearing while previous animation is in progress
+        if (animation_in_progress) {
+            return
+        }
 
         if (props.current_clear_option === "Clear GRID") {
             clear_grid()
@@ -570,9 +646,15 @@ function Grid(props) {
         } else if (props.current_clear_option === "RESET GRID") {
             reset_grid()
         }
+
     }
 
     const handle_undo = () => {
+
+        // preventing user from undoing while previous animation is in progress
+        if (animation_in_progress) {
+            return
+        }
 
         const popped_input = user_inputs.pop()
 
@@ -595,7 +677,9 @@ function Grid(props) {
         } else if (popped_input.prev_state === "WEIGHTED") {
             my_grid_ref.current[popped_input.cell.y_val][popped_input.cell.x_val].innerText = popped_input.prev_weight
             const old_color = props.calcColor(2, 50, popped_input.prev_weight)
-            change_cell_colors(popped_input.cell, old_color, old_color)
+            const new_class_name = popped_input.cell.my_key + " Grid_Cell " + popped_input.prev_state
+
+            change_cell_colors(popped_input.cell, old_color, old_color, new_class_name)
         } 
 
         // updating the grid to have the old cell properties, so search algos work
@@ -604,15 +688,27 @@ function Grid(props) {
         
     }
 
+    const stop_animation = () => {
+        if (all_timeouts.length > 0) {
+            for (const my_timeout of all_timeouts) {
+                clearTimeout(my_timeout)
+            }
+        }
+        animation_in_progress = false
+        all_timeouts = []
+    }
+
+
     return (
         <>  
 
             <div className="nav_row_3" id="nav_row_3">
 
+                <button onClick={stop_animation}>Stop Animation</button>
                 <button onClick={Start_Search_Algorithm} className="search_btn">Visualize {props.current_algorithm}</button>
                 <button onClick={Start_Maze_Algorithm} className="maze_btn">Visualize {props.current_maze}</button>
                 <button onClick={Start_Clear_Grid_Option} className="clear_btn">{props.current_clear_option}</button>
-                <button onClick={handle_undo}>Undo</button>
+                <button onClick={handle_undo} className="undo_btn"><img src="./images/undo-icon2.png" alt="" /></button>
 
             </div>
 

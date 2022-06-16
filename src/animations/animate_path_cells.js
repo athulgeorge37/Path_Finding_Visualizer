@@ -2,13 +2,14 @@ const animate_path_cells = (my_cell_path, time_finished, animation_speed, my_sta
 
     let constant_delay = animation_speed * 4
     
+    const all_timeouts = []
     // changing cells to path color with a delay
     let last_time
     for (let n=0; n < my_cell_path.length; n++) {
 
         last_time = time_finished + (constant_delay * n)
 
-        setTimeout(() => {
+        const my_timeout = setTimeout(() => {
             const my_cell = my_cell_path[n]
 
              // only want neirbor cells to affect air cells
@@ -31,9 +32,10 @@ const animate_path_cells = (my_cell_path, time_finished, animation_speed, my_sta
             // path animation speed
         }, last_time);
         
+        all_timeouts.push(my_timeout)
     }
 
-    return last_time
+    return [all_timeouts, last_time]
 }
 
 export default animate_path_cells

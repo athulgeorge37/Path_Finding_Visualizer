@@ -8,9 +8,13 @@ const animate_wall_cells = (wall_cells, animation_speed, middle_stop, my_Grid, m
         check_animated = "WALL_Animated"
     }
 
+
+    const all_timeouts = []
+
+    let k = 0
     // changing cells to searched area color with a delay
     for (let k=0; k < wall_cells.length; k++) {
-        setTimeout(() => {
+        const my_timeout = setTimeout(() => {
             const wall_cell = wall_cells[k]
 
             let can_update_cell_color = true
@@ -30,8 +34,11 @@ const animate_wall_cells = (wall_cells, animation_speed, middle_stop, my_Grid, m
 
             // animation speed 
         }, animation_speed * k);
+
+        all_timeouts.push(my_timeout)
     }
     
+    return all_timeouts
 }
 
 export default animate_wall_cells

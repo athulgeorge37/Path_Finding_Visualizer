@@ -13,6 +13,7 @@ const animate_visited_cells = (visited_cells, time_finished, slow_visited_animat
         
     }
 
+    const all_timeouts = []
 
     // changing cells to searched area color with a delay
     let last_time
@@ -25,7 +26,8 @@ const animate_visited_cells = (visited_cells, time_finished, slow_visited_animat
             last_time = time_finished + animation_speed * k
         }
 
-        setTimeout(() => {
+        const my_timeout = setTimeout(() => {
+
             const neighbor_cell = visited_cells[k]
 
             // only want neirbor cells to affect air cells
@@ -48,10 +50,14 @@ const animate_visited_cells = (visited_cells, time_finished, slow_visited_animat
 
             // animation speed 
         }, last_time);
+
+        all_timeouts.push(my_timeout)
         
     }
     
-    return last_time
+    // return last_time
+    return [all_timeouts, last_time]
+
 }
 
 export default animate_visited_cells

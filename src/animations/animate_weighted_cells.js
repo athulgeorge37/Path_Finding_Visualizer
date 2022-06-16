@@ -8,10 +8,11 @@ const animate_weighted_cells = (weighted_cells, animation_speed, middle_stop, my
         check_animated = "WEIGHTED_Animated"
     }
 
+    const all_timeouts = []
 
     // changing cells to searched area color with a delay
     for (let k=0; k < weighted_cells.length; k++) {
-        setTimeout(() => {
+        const my_timeout = setTimeout(() => {
             const weighted_cell = weighted_cells[k][0]
             const new_weight = weighted_cells[k][1]
 
@@ -33,8 +34,11 @@ const animate_weighted_cells = (weighted_cells, animation_speed, middle_stop, my
             // animation speed 
         }, animation_speed * k);
 
+        all_timeouts.push(my_timeout)
+
     }
     
+    return all_timeouts
 }
 
 export default animate_weighted_cells
