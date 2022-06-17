@@ -64,8 +64,8 @@ let my_end_cell = {
 
 let middle_stop = null
 
-let animation_in_progress = false
 
+let animation_in_progress = false
 let all_timeouts = []
 
 // initialising the grid, also called when clearing the grid
@@ -109,7 +109,8 @@ const initialise_empty_grid = () => {
 }
 
 // tracking user click and drag inputs, so they can be undone
-const user_inputs = new Stack();
+const last_user_draws = new Stack();
+let first_last_draw_remove = true
 
 function Grid(props) {
 
@@ -120,6 +121,8 @@ function Grid(props) {
     const my_grid_ref = useRef([])
 
     useEffect(() => {
+
+        // console.log("running grid size useeffect")
 
         // preventing user from undoing while previous animation is in progress
         if (animation_in_progress) {
@@ -184,8 +187,10 @@ function Grid(props) {
 
 
     useEffect(() => {
+        // console.log("running clear grid useeffect")
         clear_grid()
     }, [my_Grid])
+
 
 
     // clearing grid options
@@ -219,9 +224,10 @@ function Grid(props) {
         
         middle_stop = null
 
-        user_inputs.makeEmpty()
-
         set_my_Grid(initialise_empty_grid)
+
+        last_user_draws.items = []
+        last_user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
     }
 
     const clear_grid = () => {
@@ -247,8 +253,10 @@ function Grid(props) {
             }
         }
 
-        user_inputs.makeEmpty()
         set_algorithm_stats({no_visited_cells: 0, path_length: 0, path_cost: 0})
+
+        last_user_draws.items = []
+        last_user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
     }
 
     const clear_visited_and_path_cells = () => {
@@ -372,6 +380,10 @@ function Grid(props) {
             // new middle_stop cell
             middle_stop = my_Grid[y][x]
 
+            my_Grid[y][x].weight = 1
+
+            my_grid_ref.current[y][x].innerText = null
+
             new_cell_color = MIDDLE_CELL_COLOR
             new_cell_border_color = MIDDLE_CELL_COLOR
 
@@ -384,6 +396,10 @@ function Grid(props) {
 
             // new start cell
             my_start_cell = my_Grid[y][x]
+
+            my_Grid[y][x].weight = 1
+
+            my_grid_ref.current[y][x].innerText = null
 
             // updating colors
             new_cell_color = START_CELL_COLOR
@@ -399,6 +415,10 @@ function Grid(props) {
             // new end cell
             my_end_cell = my_Grid[y][x]
 
+            my_Grid[y][x].weight = 1
+
+            my_grid_ref.current[y][x].innerText = null
+
             // updating colors
             new_cell_color = END_CELL_COLOR
             new_cell_border_color = END_CELL_COLOR
@@ -408,16 +428,7 @@ function Grid(props) {
             my_Grid[y][x].cell_state = props.active_cell_type
             new_class_name += props.active_cell_type
 
-            change_cell_colors(my_Grid[y][x], new_cell_color, new_cell_border_color, new_class_name)
-
-            if (!["START", "END", "MIDDLE"].includes(props.active_cell_type)) {
-                user_inputs.push( {
-                    cell: my_Grid[y][x],                                 
-                    prev_state: prev_cell_state, 
-                    prev_weight: prev_cell_weight
-                } )
-            }
-            
+            change_cell_colors(my_Grid[y][x], new_cell_color, new_cell_border_color, new_class_name)            
         }
 
     }
@@ -430,6 +441,7 @@ function Grid(props) {
             return
         }
 
+        last_user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
         update_cell_type(my_key, x, y)
     }
 
@@ -468,6 +480,8 @@ function Grid(props) {
             return
         }
 
+        // pushing a deep copy of my_grid to the user draw stack
+        last_user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
         set_mouse_down(false)
     }
 
@@ -620,11 +634,14 @@ function Grid(props) {
             time_finished = props.animation_speed * cells_to_render.length
         }
 
+
         all_timeouts = all_timeouts.concat(my_timeouts)
 
         setTimeout(() => {
             animation_in_progress = false
         }, time_finished)
+
+        last_user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
 
     }
 
@@ -632,6 +649,7 @@ function Grid(props) {
 
         // preventing user from clearing while previous animation is in progress
         if (animation_in_progress) {
+            stop_animation()        // should i remove either 1 of stop animation or return ?
             return
         }
 
@@ -647,45 +665,79 @@ function Grid(props) {
             reset_grid()
         }
 
+        first_last_draw_remove = true
+
     }
 
-    const handle_undo = () => {
+    const undo_last_draw = () => {
 
-        // preventing user from undoing while previous animation is in progress
         if (animation_in_progress) {
             return
         }
 
-        const popped_input = user_inputs.pop()
+        clear_visited_and_path_cells()
 
-        if (popped_input === "Empty Stack") {
-            console.log("Empty Stack")
+        let last_grid_state =  last_user_draws.pop()
+        while (last_grid_state === my_Grid) {
+            last_grid_state = last_user_draws.pop()
+        }
+
+
+        if (first_last_draw_remove) {
+            last_grid_state = last_user_draws.pop()
+            first_last_draw_remove = false
+        }
+
+
+        if (last_grid_state === "Empty Stack") {
+            set_my_Grid(initialise_empty_grid)
+            // console.log("Empty Stack")
             return
         }
-        console.log(popped_input)
 
-        console.log("current state ", popped_input.cell.cell_state)
-        console.log("prev state ",popped_input.prev_state)
+        let middle_stop_present = false
 
-        my_grid_ref.current[popped_input.cell.y_val][popped_input.cell.x_val].innerText = null
+        for (const row of last_grid_state) {
+            for (const cell of row) {
 
-        // updating the cell to the prev state
-        if (popped_input.prev_state === "WALL") {
-            change_cell_colors(popped_input.cell, WALL_CELL_COLOR, WALL_CELL_COLOR)
-        } else if (popped_input.prev_state === "AIR") {
-            change_cell_colors(popped_input.cell, AIR_CELL_COLOR, AIR_CELL_BORDER_COLOR)
-        } else if (popped_input.prev_state === "WEIGHTED") {
-            my_grid_ref.current[popped_input.cell.y_val][popped_input.cell.x_val].innerText = popped_input.prev_weight
-            const old_color = props.calcColor(2, 50, popped_input.prev_weight)
-            const new_class_name = popped_input.cell.my_key + " Grid_Cell " + popped_input.prev_state
+                my_grid_ref.current[cell.y_val][cell.x_val].innerText = null
 
-            change_cell_colors(popped_input.cell, old_color, old_color, new_class_name)
-        } 
+                let border_color = AIR_CELL_BORDER_COLOR
+                let background_color = AIR_CELL_COLOR
 
-        // updating the grid to have the old cell properties, so search algos work
-        my_Grid[popped_input.cell.y_val][popped_input.cell.x_val].cell_state = popped_input.prev_state
-        my_Grid[popped_input.cell.y_val][popped_input.cell.x_val].weight = popped_input.prev_weight
-        
+                if (cell.cell_state === "WALL") {
+                    border_color = WALL_CELL_COLOR
+                    background_color = WALL_CELL_COLOR
+                } else if (cell.cell_state === "WEIGHTED") {
+                    my_grid_ref.current[cell.y_val][cell.x_val].innerText = cell.weight
+                    const old_color = props.calcColor(2, 50, cell.weight)
+                    border_color = old_color
+                    background_color = old_color
+                } else if (cell.cell_state === "MIDDLE") {
+                    border_color = MIDDLE_CELL_COLOR
+                    background_color = MIDDLE_CELL_COLOR
+
+                    middle_stop = cell
+                    middle_stop_present = true
+                } else if (cell.cell_state === "START") {
+                    border_color = START_CELL_COLOR
+                    background_color = START_CELL_COLOR
+                    my_start_cell = cell
+                } else if (cell.cell_state === "END") {
+                    border_color = END_CELL_COLOR
+                    background_color = END_CELL_COLOR
+                    my_end_cell = cell
+                }
+
+                change_cell_colors(cell, background_color, border_color)
+                
+                my_Grid[cell.y_val][cell.x_val] = cell
+            }
+        }
+
+        if (middle_stop_present === false) {
+            middle_stop = null
+        }
     }
 
     const stop_animation = () => {
@@ -708,10 +760,10 @@ function Grid(props) {
                 <button onClick={Start_Search_Algorithm} className="search_btn">Visualize {props.current_algorithm}</button>
                 <button onClick={Start_Maze_Algorithm} className="maze_btn">Visualize {props.current_maze}</button>
                 <button onClick={Start_Clear_Grid_Option} className="clear_btn">{props.current_clear_option}</button>
-                <button onClick={handle_undo} className="undo_btn"><img src="./images/undo-icon2.png" alt="" /></button>
+                <button onClick={undo_last_draw} className="undo_btn"><img src="./images/undo-icon2.png" alt="undo_btn" /></button>
 
             </div>
-
+ 
             <div className="Grid" id="Grid">
 
                 <p>Visited {algorithm_stats.no_visited_cells} cells out of {GRID_HEIGHT * GRID_WIDTH}, Path Length = {algorithm_stats.path_length}, Path Cost = {algorithm_stats.path_cost}</p>
