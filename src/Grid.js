@@ -64,9 +64,15 @@ let my_end_cell = {
 
 let middle_stop = null
 
-
 let animation_in_progress = false
 let all_timeouts = []
+
+// tracking user click and drag inputs, so they can be undone
+const user_draws = new Stack();
+let first_user_draws = true
+
+let mouse_on_grid = false
+let mouse_down = false
 
 // initialising the grid, also called when clearing the grid
 const initialise_empty_grid = () => {
@@ -108,16 +114,12 @@ const initialise_empty_grid = () => {
     return empty_grid
 }
 
-// tracking user click and drag inputs, so they can be undone
-const last_user_draws = new Stack();
-let first_last_draw_remove = true
-
 function Grid(props) {
 
 
     const [my_Grid, set_my_Grid] = useState(initialise_empty_grid)
     const [algorithm_stats, set_algorithm_stats] = useState({no_visited_cells: 0, path_length: 0, path_cost: 0})
-    const [mouse_down, set_mouse_down] = useState(false)
+    // const [mouse_down, set_mouse_down] = useState(false)
     const my_grid_ref = useRef([])
 
     useEffect(() => {
@@ -129,11 +131,10 @@ function Grid(props) {
             stop_animation()
         }
 
-		const nav_bar_height = document.getElementById("nav_row_1").clientHeight +
-							   document.getElementById("nav_row_2").clientHeight +
-							   document.getElementById("nav_row_3").clientHeight
+		const nav_bar_height = document.getElementById("nav_bar").clientHeight +
+							   document.getElementById("grid_buttons").clientHeight
 
-        const grid_width_px = document.getElementById("nav_bar").clientWidth
+        const grid_width_px = document.getElementById("grid_buttons").clientWidth
         const grid_height_px = window.innerHeight - nav_bar_height
 
         if (props.current_grid_size === "Small") {
@@ -226,8 +227,8 @@ function Grid(props) {
 
         set_my_Grid(initialise_empty_grid)
 
-        last_user_draws.items = []
-        last_user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
+        user_draws.makeEmpty()
+        user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
     }
 
     const clear_grid = () => {
@@ -255,8 +256,8 @@ function Grid(props) {
 
         set_algorithm_stats({no_visited_cells: 0, path_length: 0, path_cost: 0})
 
-        last_user_draws.items = []
-        last_user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
+        user_draws.makeEmpty()
+        user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
     }
 
     const clear_visited_and_path_cells = () => {
@@ -441,7 +442,7 @@ function Grid(props) {
             return
         }
 
-        last_user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
+        user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
         update_cell_type(my_key, x, y)
     }
 
@@ -454,9 +455,11 @@ function Grid(props) {
         
         try {
             update_cell_type(my_key, x, y)
-            set_mouse_down(true)
+            // set_mouse_down(true)
+            mouse_down = true
         } catch (TypeError) {
-            set_mouse_down(false)
+            // set_mouse_down(false)
+            mouse_down = false
         }
             
     }
@@ -468,7 +471,7 @@ function Grid(props) {
             return
         }
 
-        if (mouse_down) {
+        if (mouse_down && mouse_on_grid) {
             update_cell_type(my_key, x, y)
         }
     }
@@ -481,8 +484,9 @@ function Grid(props) {
         }
 
         // pushing a deep copy of my_grid to the user draw stack
-        last_user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
-        set_mouse_down(false)
+        user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
+        // set_mouse_down(false)
+        mouse_down = false
     }
 
     // starting search, maze, clear algorithms
@@ -641,7 +645,7 @@ function Grid(props) {
             animation_in_progress = false
         }, time_finished)
 
-        last_user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
+        user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
 
     }
 
@@ -665,7 +669,7 @@ function Grid(props) {
             reset_grid()
         }
 
-        first_last_draw_remove = true
+        first_user_draws = true
 
     }
 
@@ -677,15 +681,15 @@ function Grid(props) {
 
         clear_visited_and_path_cells()
 
-        let last_grid_state =  last_user_draws.pop()
+        let last_grid_state =  user_draws.pop()
         while (last_grid_state === my_Grid) {
-            last_grid_state = last_user_draws.pop()
+            last_grid_state = user_draws.pop()
         }
 
 
-        if (first_last_draw_remove) {
-            last_grid_state = last_user_draws.pop()
-            first_last_draw_remove = false
+        if (first_user_draws) {
+            last_grid_state = user_draws.pop()
+            first_user_draws = false
         }
 
 
@@ -754,73 +758,103 @@ function Grid(props) {
     return (
         <>  
 
-            <div className="nav_row_3" id="nav_row_3">
+            <div className="grid_buttons_container" id="grid_buttons">
 
-                <button onClick={stop_animation}>Stop Animation</button>
-                <button onClick={Start_Search_Algorithm} className="search_btn">Visualize {props.current_algorithm}</button>
-                <button onClick={Start_Maze_Algorithm} className="maze_btn">Visualize {props.current_maze}</button>
-                <button onClick={Start_Clear_Grid_Option} className="clear_btn">{props.current_clear_option}</button>
-                <button onClick={undo_last_draw} className="undo_btn"><img src="./images/undo-icon2.png" alt="undo_btn" /></button>
+                <div className="grid_buttons">
+
+                    <div className="col_1_btns">
+                        <button onClick={stop_animation}>Stop Animation</button>
+                    </div>
+
+                    <div className="col_2_btns">
+                        <button onClick={Start_Search_Algorithm} className="search_btn">Visualize {props.current_algorithm}</button>
+                        <button onClick={Start_Maze_Algorithm} className="maze_btn">Visualize {props.current_maze}</button>
+                        <button onClick={Start_Clear_Grid_Option} className="clear_btn">{props.current_clear_option}</button>
+                    </div>
+
+                    <div className="col_3_btns">
+                        <button onClick={undo_last_draw} className="undo_btn"><img src="./images/undo-icon2.png" alt="undo_btn" /></button>
+                    </div>
+                    
+
+                </div>
 
             </div>
+
  
-            <div className="Grid" id="Grid">
+            <div className="Grid_container">
 
                 <p>Visited {algorithm_stats.no_visited_cells} cells out of {GRID_HEIGHT * GRID_WIDTH}, Path Length = {algorithm_stats.path_length}, Path Cost = {algorithm_stats.path_cost}</p>
                 
-                {my_Grid.map((row, row_ID) => {
-                    my_grid_ref.current[row_ID] = []
-                    return (
-                        <div className={"Grid_Row " + row_ID} key={row_ID}>
-                            {row.map((my_cell, cell_index) => {
-                                const {x_val, y_val, cell_state, my_key, weight} = my_cell
+                <div 
+                    className="Grid" 
+                    id="Grid" 
+                    onMouseEnter={() => {
+                        mouse_on_grid = true
+                    }}
+                    onMouseLeave={() => {
+                        mouse_on_grid = false
+                        mouse_down = false
 
-                                let my_class_name = my_key + " Grid_Cell " + cell_state
+                        // pushing a deep copy of my_grid to the user draw stack
+                        user_draws.push(JSON.parse(JSON.stringify(my_Grid)))
+                    }}
+                
+                >
+                    {my_Grid.map((row, row_ID) => {
+                        my_grid_ref.current[row_ID] = []
+                        return (
+                            <div className={"Grid_Row " + row_ID} key={row_ID}>
+                                {row.map((my_cell, cell_index) => {
+                                    const {x_val, y_val, cell_state, my_key, weight} = my_cell
 
-                                let pixel_size = 0
-                                if (props.current_grid_size === "Small") {
-                                    pixel_size = 30
-                                } else if (props.current_grid_size === "Medium") {
-                                    pixel_size = 22.5
-                                } else if (props.current_grid_size === "Large") {
-                                    pixel_size = 15
-                                } 
+                                    let my_class_name = my_key + " Grid_Cell " + cell_state
 
-                                if (props.active_cell_type === "START" ||
-                                    props.active_cell_type === "END" ||
-                                    props.active_cell_type === "MIDDLE") {
-                                    return (
-                                        <div
-                                            key={my_key}
-                                            className={my_class_name}
-                                            style={{height: pixel_size, width: pixel_size}}
-                                            ref={(element) => {
-                                                my_grid_ref.current[row_ID][cell_index] = element;
-                                            }}
+                                    let pixel_size = 0
+                                    if (props.current_grid_size === "Small") {
+                                        pixel_size = 30
+                                    } else if (props.current_grid_size === "Medium") {
+                                        pixel_size = 22.5
+                                    } else if (props.current_grid_size === "Large") {
+                                        pixel_size = 15
+                                    } 
 
-                                            onClick={() => handle_mouse_click(x_val, y_val, my_key)}
-                                        >{weight !== 1 ? weight : ""}</div>
-                                    )
-                                } 
-                                else {
-                                    return (
-                                        <div
-                                            key={my_key}
-                                            className={my_class_name}
-                                            style={{height: pixel_size, width: pixel_size}}
-                                            ref={(element) => {
-                                                my_grid_ref.current[row_ID][cell_index] = element;
-                                            }}
+                                    if (props.active_cell_type === "START" ||
+                                        props.active_cell_type === "END" ||
+                                        props.active_cell_type === "MIDDLE") {
+                                        return (
+                                            <div
+                                                key={my_key}
+                                                className={my_class_name}
+                                                style={{height: pixel_size, width: pixel_size}}
+                                                ref={(element) => {
+                                                    my_grid_ref.current[row_ID][cell_index] = element;
+                                                }}
 
-                                            onMouseDown={() => handle_mouse_down(x_val, y_val, my_key)}
-                                            onMouseEnter={() => handle_mouse_enter(x_val, y_val, my_key)}
-                                            onMouseUp={() => handle_mouse_up()}
-                                        >{weight !== 1 ? weight : ""}</div>
-                                    )
-                                }})}
-                        </div>
-                    );
-                })}
+                                                onClick={() => handle_mouse_click(x_val, y_val, my_key)}
+                                            >{weight !== 1 ? weight : ""}</div>
+                                        )
+                                    } 
+                                    else {
+                                        return (
+                                            <div
+                                                key={my_key}
+                                                className={my_class_name}
+                                                style={{height: pixel_size, width: pixel_size}}
+                                                ref={(element) => {
+                                                    my_grid_ref.current[row_ID][cell_index] = element;
+                                                }}
+
+                                                onMouseDown={() => handle_mouse_down(x_val, y_val, my_key)}
+                                                onMouseEnter={() => handle_mouse_enter(x_val, y_val, my_key)}
+                                                onMouseUp={() => handle_mouse_up()}
+                                            >{weight !== 1 ? weight : ""}</div>
+                                        )
+                                    }})}
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
 
 

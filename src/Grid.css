@@ -1,12 +1,37 @@
 /* start nav row 3 */
-.nav_row_3 {
+
+.grid_buttons_container {
+    background-color: var(--BACKGROUND_color_DARK);
     display: flex;
     justify-content: center;
     align-items: center;
+}
 
-    padding-bottom: 20px;
+
+.grid_buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+
+    width: 100vw;
+    max-width: 1500px;
+    padding: 10px 0 20px 0;
 
     background-color: var(--BACKGROUND_color_DARK);
+}
+
+
+.col_1_btns,
+.col_3_btns {
+    display: flex;
+    justify-content: center;
+    flex: 1 1 0;
+}
+
+.col_2_btns {
+    display: flex;
+    justify-content: center;
+    flex: 2 1 0;
 }
 
 .search_btn {
@@ -27,14 +52,23 @@
 }
 /* end of nav row 3 */
 
-.Grid {
+.Grid_container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    
-    padding: 3rem 0;
+    justify-content: center;
 
-    background-color: var(--AIR_color);
+    background-color: var(--BACKGROUND_color_LIGHT);
+}
+
+.Grid_container p {
+    margin: 1.5rem 0;
+}
+
+.Grid {
+    width: fit-content;
+    margin-bottom: 3rem;
+    background-color: var(--BACKGROUND_color_LIGHT);
 }
 
 .Grid_Row {
