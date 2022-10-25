@@ -8,11 +8,11 @@ Description:
 - Also implements many quality of life improvements and extra features, over similar existing projects.
 
 ## Demo:
-See the live demo [here](https://athulgeorge37.github.io/Path_Finding_Visualizer/){:target="_blank" rel="noopener"}
+See the live demo <a href="http://stackoverflow.com" target="_blank">here</a>
 
 Inspiration: 
 - A similar project 
-  - by Clement's [Path Finding Visualizer](https://clementmihailescu.github.io/Pathfinding-Visualizer/){:target="_blank" rel="noopener"}
+  - by Clement's [Path Finding Visualizer](https://clementmihailescu.github.io/Pathfinding-Visualizer/)
 - A previous University assignment
-  - [project](https://www.youtube.com/watch?v=Eu465Jue3ns){:target="_blank" rel="noopener"} 
+  - [project](https://www.youtube.com/watch?v=Eu465Jue3ns)
   - I had made in a group assignment that involves path finding in the third dimension.  
