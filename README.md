@@ -1,12 +1,14 @@
-# Path_Finding_Visualizer
+# Path Finding Visualizer
 
-Finds the shortest distance between 2 points using different searching algorithms.
-You can also use a variety of maze generation algorithms to test the search algorithms with.
-I have also allowed the user to place weight cells of varied costs.
-There is also a many quality of life improvements and extra features.
+Description: 
 
-You can see the project here:
-https://athulgeorge37.github.io/Path_Finding_Visualizer/
+- Finds the shortest distance between 2 points using different graph searching algorithms.
+- Incoporates a variety of maze generation algorithms.
+- User can also place weights of varying costs on any graph cell.
+- Also implements many quality of life improvements and extra features, over similar projects.
 
-Inspiration:
-https://clementmihailescu.github.io/Pathfinding-Visualizer/#
+## Demo:
+See the live demo [here](https://athulgeorge37.github.io/Path_Finding_Visualizer/)
+
+- I was inspired by Clement's [Path Finding Visualizer](https://clementmihailescu.github.io/Pathfinding-Visualizer/)
+- and from a previous [project](https://www.youtube.com/watch?v=Eu465Jue3ns) I had made eariler that involves path finding in the third dimension.  
