@@ -8,7 +8,7 @@ Description:
 - Also implements many quality of life improvements and extra features, over similar existing projects.
 
 ## Demo:
-See the live demo <a href="http://stackoverflow.com" target="_blank">here</a>
+See the live demo [here](https://athulgeorge37.github.io/Path_Finding_Visualizer/)
 
 Inspiration: 
 - A similar project 
